@@ -37,6 +37,13 @@ The following extra is intended to be useful:
 	• Handle different screens, and keyboard shortcuts to switch easily between them.
 
 
+## Walkthrough
+So, how do we actually do that ? First, we need to gain some knowledge about how a kernel works, and how to boot it. The best resource for that is the [os dev wiki](https://wiki.osdev.org/Expanded_Main_Page). It contains a lot of information about how to create an operating system from scratch, and how to boot it.
+
+
+
+
+
 ## Ressources
 - [os dev wiki](https://wiki.osdev.org/Expanded_Main_Page)
 - https://wiki.osdev.org/Tutorials#Kernel_Basics
