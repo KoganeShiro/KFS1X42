@@ -83,4 +83,6 @@ clean:
 	rm -rf $(ISODIR)
 	rm -f $(ISO)
 
-.PHONY: all iso clean run docker-build docker-iso help re
+fclean: clean docker-clean
+
+.PHONY: all iso clean run docker-build docker-iso help re fclean

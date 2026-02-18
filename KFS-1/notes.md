@@ -62,8 +62,12 @@ Power On
             → kernel_main() runs forever     (kernel.c)
 ```
 
-https://wiki.osdev.org/Beginner_Mistakes
-> Common examples include being too lazy to use a Cross-Compiler, not understanding Real Mode, Unreal Mode, Protected Mode, and Long Mode and jumping far too fast from one to the other without first understanding how to gather all of the vital configuration and use all of its capabilities fully (especially detecting basic capabilities with the BIOS during boot and initialization), relying on BIOS calls that are not standard, not learning to write hardware drivers in your own OS and under Windows and Linux for greatest convenience, exposing test capabilities globally, using flat binaries instead of ELF, not learning about executable, archive, graphics, document and other file formats and compression algorithms, and so on. Experienced developers use the superior alternatives for a reason, which you might not understand yet. Experienced developers choose to use the inferior method in some cases, but that's because they can carefully analyze whether it is appropriate, and they know when not to use it. As a beginner or intermediate developer you will likely not know these methods and technologies well enough to reason whether the inferior solution is good enough for you. Remember that if you oppose a method, you should know it well enough to know everything that is wrong (and right) with it. Either way, laziness and ignorance only leads to trouble down the road. When in doubt, pick what appears to be the conservative choice rather than the simpler. 
+```
+boot.s --[assembler]--> boot.o
+kernel.c --[compiler]--> kernel.o
+boot.o + kernel.o --[linker + linker.ld]--> kfs1.bin
+kfs1.bin + grub.cfg --[grub-mkrescue]--> kfs1.iso
+```
 
 ```c
 /*
@@ -145,6 +149,19 @@ project/
 **What it does**: Provides the multiboot header so GRUB recognizes our binary,
 then sets up a stack and calls `kernel_main`.
 
+/*
+ * grub.cfg - GRUB Bootloader Configuration
+ * 
+ * Tells GRUB how to boot your kernel.
+ * 
+ * Settings:
+ *   timeout=0  → Boot immediately, no menu delay
+ *   default=0  → Boot first menu entry by default
+ * 
+ * Menu entry:
+ *   multiboot /boot/kernel.bin  → Load kernel using Multiboot protocol
+ *   boot                         → Start execution
+ */
 
 **What to verify:**
 - [ ] GRUB boots and jumps to our code
@@ -228,8 +245,19 @@ function inb(port):
 
 ### STEP 7 — printk (Formatted Debug Output)
 > Concepts: [[VGA connector]] (freestanding headers: `<stdarg.h>`)
+https://web.archive.org/web/20160818090942/http://www.makelinux.net/books/lkd2/ch18lev1sec3
 
 **File: `printk.c`**
+
+Color Byte = [Background 4 bits][Foreground 4 bits]
+             ╰──────────╯       ╰──────────╯
+             bits 7-4            bits 3-0
+
+
+RED (4) | BLACK (0) << 4 = 0x04 = 0000 0100
+                            ││││ ││││
+                            ││││ ╰───> Red foreground
+                            ╰────────> Black background
 
 **What it does**: `printk("Hello %s, val=%d hex=%x", name, 42, 0xFF)`
 

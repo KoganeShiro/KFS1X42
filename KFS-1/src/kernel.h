@@ -20,6 +20,12 @@
 # define VGA_HEIGHT  25
 # define VGA_MEMORY  0xB8000
 
+/* printk log level */
+
+# define LOG_LEVEL_INFO "[INFO]"
+# define LOG_LEVEL_WARNING "[WARNING]"
+# define LOG_LEVEL_ERROR "[ERROR]"
+
 /* Hardware VGA color palette */
 enum vga_color
 {
@@ -61,7 +67,8 @@ void	kfs_initialize(vga_terminal *terminal);
 /* printk.c */
 void	kfs_putentry_at(vga_terminal *terminal, char c);
 void	kfs_putchar(vga_terminal *terminal, char c);
-void	ft_printk(vga_terminal *terminal, const char *data);
+void	printk(vga_terminal *terminal, const char *data, ...);
+
 
 /* handle_keyboard.c */
 /*
@@ -106,8 +113,9 @@ Switch to an existing screen by index.
 // Helper functions (utils.c)
 uint16_t vga_entry(unsigned char uc, uint8_t color) ;
 void	kfs_set_color(vga_terminal *terminal, uint8_t color);
-size_t 	ft_strlen(const char* str) ;
-char* 	itoa(int value, char* buffer);
+size_t 	strlen(const char* str) ;
+void 	print_header(vga_terminal *terminal) ;
+
 
 
 #endif
