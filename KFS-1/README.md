@@ -30,10 +30,10 @@ After compilation, all the objects must be linked together in order to create th
 
 ## Bonus
 The following extra is intended to be useful:
-	• Add scroll and cursor support to your I/O interface.
-	• Add colors support to your I/O interface.
 	• Add helpers like printf / printk in order to print information / debug easily.
+	• Add colors support to your I/O interface.
 	• Handle keyboard entries and print them.
+	• Add scroll and cursor support to your I/O interface.
 	• Handle different screens, and keyboard shortcuts to switch easily between them.
 
 

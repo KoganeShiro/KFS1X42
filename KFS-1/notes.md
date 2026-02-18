@@ -55,12 +55,61 @@
 ```
 Power On
   → BIOS/UEFI initializes hardware          (not our code)
-    → GRUB reads multiboot header            (not our code, but we write the header)
+    → GRUB reads multiboot header            (not our code, but we write the header so GRUB recognizes our binary)
       → GRUB loads kernel ELF into memory    (not our code)
-        → CPU jumps to our ASM entry point   (boot.asm)
-          → ASM sets up stack, calls C       (boot.asm → kernel_main)
+        → CPU jumps to our ASM entry point   (boot.s)
+          → ASM sets up stack, calls C       (boot.s → kernel_main)
             → kernel_main() runs forever     (kernel.c)
 ```
+
+https://wiki.osdev.org/Beginner_Mistakes
+> Common examples include being too lazy to use a Cross-Compiler, not understanding Real Mode, Unreal Mode, Protected Mode, and Long Mode and jumping far too fast from one to the other without first understanding how to gather all of the vital configuration and use all of its capabilities fully (especially detecting basic capabilities with the BIOS during boot and initialization), relying on BIOS calls that are not standard, not learning to write hardware drivers in your own OS and under Windows and Linux for greatest convenience, exposing test capabilities globally, using flat binaries instead of ELF, not learning about executable, archive, graphics, document and other file formats and compression algorithms, and so on. Experienced developers use the superior alternatives for a reason, which you might not understand yet. Experienced developers choose to use the inferior method in some cases, but that's because they can carefully analyze whether it is appropriate, and they know when not to use it. As a beginner or intermediate developer you will likely not know these methods and technologies well enough to reason whether the inferior solution is good enough for you. Remember that if you oppose a method, you should know it well enough to know everything that is wrong (and right) with it. Either way, laziness and ignorance only leads to trouble down the road. When in doubt, pick what appears to be the conservative choice rather than the simpler. 
+
+```c
+/*
+** Boot pipeline:
+**
+** 1. Makefile compiles our kernel code (.o) using our linker script to form a binary file -> kernel.bin
+**    -> https://wiki.osdev.org/Linker_Scripts
+**    -> https://wiki.osdev.org/Why_do_I_need_a_Cross_Compiler%3F
+**
+** 2. GRUB loads the binary thanks to the Multiboot header embedded in boot.s and creates an iso image
+**    -> https://wiki.osdev.org/GRUB
+**    -> https://wiki.osdev.org/Multiboot
+**
+** 3. QEMU/KVM emulates the hardware and runs the iso image containing our kernel
+**    -> https://wiki.osdev.org/QEMU
+**
+** Reference: https://wiki.osdev.org/Bare_Bones
+*/
+
+/*
+You (developer)                        The machine (at boot time)
+─────────────                          ──────────────────────────
+1. Write boot.s with multiboot header
+2. Compile + link → kernel.bin
+3. grub-mkrescue → kfs1.iso
+4. Give ISO to QEMU
+                                       5. BIOS starts
+                                       6. GRUB loads from the ISO
+                                       7. GRUB scans kernel.bin for
+                                          the magic number 0x1BADB002
+                                       8. GRUB finds it → "OK, this
+                                          is a valid multiboot kernel"
+                                       9. GRUB loads kernel.bin into
+                                          memory at the right address
+                                       10. GRUB jumps to _start
+                                       11. Your boot.s runs → calls
+                                           kernel_main()
+
+
+Multiboot header (in boot.s) = "Dear GRUB, I'm a real kernel, please boot me" → runtime
+Linker script (linker.ld) = "Dear linker, arrange my binary like this in memory" → build time
+GRUB does NOT compile anything. It's a bootloader that loads your pre-built binary at boot time.
+grub-mkrescue just packages the binary + GRUB into a bootable ISO.
+*/
+```
+
 
 ---
 
@@ -69,34 +118,21 @@ Power On
 
 ```
 project/
-├── Makefile              ← Compiles ASM + C, links into kernel.bin, builds ISO
-├── linker.ld             ← Memory layout (kernel at 0x100000)
+├── Makefile                    ← Compiles ASM + C, links into kernel.bin, builds ISO
 ├── src/
-│   ├── boot.asm          ← Multiboot header + entry point
-│   ├── kernel.c          ← kernel_main()
-│   ├── vga.c / vga.h     ← Screen output
-│   ├── string.c / string.h ← strlen, memcpy, memset, strcmp
-│   ├── printk.c / printk.h ← printk() with format specifiers
-│   ├── idt.c / idt.h     ← Interrupt Descriptor Table
-│   ├── pic.c / pic.h     ← PIC remapping
+│   ├── kernel.c                ← kernel_main()
+│   ├── vga.c / vga.h           ← Screen output
+│   ├── string.c / string.h     ← strlen, memcpy, memset, strcmp
+│   ├── printk.c / printk.h     ← printk() with format specifiers
+│   ├── idt.c / idt.h           ← Interrupt Descriptor Table
+│   ├── pic.c / pic.h           ← PIC remapping
 │   ├── keyboard.c / keyboard.h ← Keyboard driver
 │   ├── terminal.c / terminal.h ← Multi-screen manager
-│   └── io.asm / io.h     ← inb() / outb() port I/O
-└── iso/
-    └── boot/grub/
-        └── grub.cfg      ← GRUB menu configuration
-```
-
-**Makefile pseudo-logic:**
-```
-ASM_SOURCES  = find all .asm files
-C_SOURCES    = find all .c files
-
-For each .asm → assemble with nasm -f elf32 → .o
-For each .c   → compile with gcc -m32 -ffreestanding -nostdlib → .o
-Link all .o   → ld -T linker.ld → kernel.bin
-Build ISO     → grub-mkrescue → kernel.iso
-Run           → qemu-system-i386 -cdrom kernel.iso
+│   └── io.asm / io.h           ← inb() / outb() port I/O
+└── boot/
+│   ├── boot.s                  ← Multiboot header + entry point
+    ├── grub.cfg                ← GRUB menu configuration
+    └── linker.ld               ← Memory layout (kernel at 0x100000)
 ```
 
 ---
@@ -104,45 +140,11 @@ Run           → qemu-system-i386 -cdrom kernel.iso
 ### STEP 1 — Multiboot Header & Boot ASM
 > Concepts: [[Booting]], [[Bootloader (GRUB ex)]], [[Assembly language]], [[X86]]
 
-**File: `boot.asm`**
+**File: `boot.s`**
 
 **What it does**: Provides the multiboot header so GRUB recognizes our binary,
 then sets up a stack and calls `kernel_main`.
 
-```
-; ── Multiboot Header ──────────────────────────
-; Must be within the first 8KB of the binary
-; GRUB scans for this magic signature
-
-MAGIC    = 0x1BADB002              ; "I am a multiboot kernel"
-FLAGS    = 0x00000003              ; Align modules + provide memory map
-CHECKSUM = -(MAGIC + FLAGS)        ; Must sum to zero with magic + flags
-
-Write MAGIC, FLAGS, CHECKSUM as 32-bit values in a special section
-
-; ── Entry Point ───────────────────────────────
-; GRUB jumps here after loading us into memory
-; At this point:
-;   - CPU is in 32-bit protected mode (GRUB did this)
-;   - Interrupts are disabled
-;   - No stack exists yet
-;   - EAX = 0x2BADB002 (multiboot magic confirmation)
-;   - EBX = pointer to multiboot info struct
-
-_start:
-    Set ESP to top of our stack      ; We must create our own stack
-    Call kernel_main                  ; Jump to C code
-    CLI                               ; Disable interrupts
-    HLT                               ; Halt CPU (should never reach here)
-    Jump back to HLT forever          ; Safety loop
-
-; ── Stack ─────────────────────────────────────
-; Reserve 16KB of space in .bss section for our stack
-; Stack grows DOWNWARD so ESP points to the TOP
-
-Reserve 16384 bytes for stack
-stack_top = end of reserved space
-```
 
 **What to verify:**
 - [ ] GRUB boots and jumps to our code
@@ -158,19 +160,6 @@ stack_top = end of reserved space
 **What it does**: Tells the linker WHERE to place each section in memory.
 GRUB loads kernels at 1MB (0x100000) — below that is BIOS/hardware memory.
 
-```
-Set entry point to _start
-
-Start placing code at address 0x100000 (1 MB)
-
-Sections in order:
-  .multiboot  → Multiboot header (MUST be first — GRUB scans for it)
-  .text       → All executable code
-  .rodata     → Read-only data (string literals, const)
-  .data       → Initialized global variables
-  .bss        → Uninitialized globals (zeroed by loader)
-```
-
 ---
 
 ### STEP 3 — Minimal Kernel (Display "42")
@@ -179,21 +168,6 @@ Sections in order:
 **File: `kernel.c`**
 
 **What it does**: First C function called. Clears screen, prints "42".
-
-```
-function kernel_main():
-    // Direct VGA write to prove kernel works
-    VGA_BUFFER = pointer to memory address 0xB8000
-    
-    // Each cell = 2 bytes: [ASCII char] [color attribute]
-    // 0x0F = white text on black background
-    VGA_BUFFER[0] = '4' | (0x0F << 8)    // char '4' + white color
-    VGA_BUFFER[1] = '2' | (0x0F << 8)    // char '2' + white color
-    
-    // Hang forever
-    loop forever:
-        halt CPU
-```
 
 **What to verify:**
 - [ ] "42" appears on screen after boot
@@ -234,27 +208,6 @@ function inb(port):
 
 **What it does**: Basic utility functions. No libc exists — we write everything.
 
-```
-function strlen(str):
-    count = 0
-    while str[count] != '\0':
-        count++
-    return count
-
-function memcpy(dest, src, n):
-    for i = 0 to n-1:
-        dest[i] = src[i]
-
-function memset(dest, value, n):
-    for i = 0 to n-1:
-        dest[i] = value
-
-function strcmp(s1, s2):
-    while *s1 and (*s1 == *s2):
-        s1++, s2++
-    return *s1 - *s2
-```
-
 ---
 
 ### STEP 6 — VGA Terminal Driver (Colors, Scroll, Cursor)
@@ -263,102 +216,6 @@ function strcmp(s1, s2):
 **File: `vga.c`**
 
 **What it does**: Full terminal output with colors, scrolling, and hardware cursor.
-
-```
-; ── Constants ─────────────────────────────────
-VGA_BUFFER   = 0xB8000
-VGA_WIDTH    = 80
-VGA_HEIGHT   = 25
-CURSOR_CMD   = 0x3D4              ; Cursor command port
-CURSOR_DATA  = 0x3D5              ; Cursor data port
-
-; ── Terminal State ────────────────────────────
-terminal_row    = 0               ; Current cursor Y
-terminal_col    = 0               ; Current cursor X
-terminal_color  = 0x0F            ; Default: white on black
-terminal_buffer = pointer to VGA_BUFFER
-
-; ── Color Support ─────────────────────────────
-function make_color(foreground, background):
-    return foreground | (background << 4)
-    ; Example: make_color(WHITE, BLUE) = 0x1F
-
-function set_color(foreground, background):
-    terminal_color = make_color(foreground, background)
-
-; ── Character Output ──────────────────────────
-function make_vga_entry(character, color):
-    return character | (color << 8)       ; Pack into 16-bit value
-
-function putchar_at(char, color, x, y):
-    index = y * VGA_WIDTH + x
-    terminal_buffer[index] = make_vga_entry(char, color)
-
-; ── Main putchar (handles special chars) ──────
-function terminal_putchar(char):
-    if char == '\n':
-        terminal_col = 0
-        terminal_row++
-    else if char == '\b':                  ; Backspace
-        if terminal_col > 0:
-            terminal_col--
-            putchar_at(' ', terminal_color, terminal_col, terminal_row)
-    else if char == '\t':                  ; Tab
-        terminal_col = align to next multiple of 4
-    else:
-        putchar_at(char, terminal_color, terminal_col, terminal_row)
-        terminal_col++
-
-    ; Line wrap
-    if terminal_col >= VGA_WIDTH:
-        terminal_col = 0
-        terminal_row++
-
-    ; Scroll needed?
-    if terminal_row >= VGA_HEIGHT:
-        terminal_scroll()
-        terminal_row = VGA_HEIGHT - 1
-
-    ; Update hardware cursor position
-    update_cursor(terminal_col, terminal_row)
-
-; ── Scroll ────────────────────────────────────
-function terminal_scroll():
-    ; Move every line UP by one
-    for y = 1 to VGA_HEIGHT - 1:
-        memcpy(row[y-1], row[y], VGA_WIDTH * 2 bytes)
-
-    ; Clear the last line
-    for x = 0 to VGA_WIDTH - 1:
-        putchar_at(' ', terminal_color, x, VGA_HEIGHT - 1)
-
-; ── Hardware Cursor ───────────────────────────
-function update_cursor(x, y):
-    position = y * VGA_WIDTH + x
-
-    outb(CURSOR_CMD, 0x0F)                ; Low byte register
-    outb(CURSOR_DATA, position & 0xFF)    ; Send low byte
-    outb(CURSOR_CMD, 0x0E)                ; High byte register
-    outb(CURSOR_DATA, position >> 8)      ; Send high byte
-
-function enable_cursor():
-    outb(CURSOR_CMD, 0x0A)
-    outb(CURSOR_DATA, 0)                  ; Cursor start scanline
-    outb(CURSOR_CMD, 0x0B)
-    outb(CURSOR_DATA, 15)                 ; Cursor end scanline
-
-; ── Clear & Print ─────────────────────────────
-function terminal_clear():
-    for every cell in 80x25 grid:
-        putchar_at(' ', terminal_color, x, y)
-    terminal_row = 0
-    terminal_col = 0
-    update_cursor(0, 0)
-
-function terminal_print(string):
-    for each character in string:
-        terminal_putchar(character)
-```
 
 **What to verify:**
 - [ ] Text wraps at column 80
@@ -376,73 +233,6 @@ function terminal_print(string):
 
 **What it does**: `printk("Hello %s, val=%d hex=%x", name, 42, 0xFF)`
 
-```
-; ── Helper: Integer to String ─────────────────
-function itoa(value, buffer, base):
-    ; Convert integer to string in given base (10 or 16)
-    if value == 0:
-        buffer = "0"
-        return
-
-    digits = "0123456789ABCDEF"
-    i = 0
-    temp = value
-
-    while temp > 0:
-        remainder = temp % base
-        buffer[i++] = digits[remainder]
-        temp = temp / base
-
-    reverse buffer[0..i-1]
-    buffer[i] = '\0'
-
-; ── printk ────────────────────────────────────
-function printk(format_string, ...):
-    ; Uses compiler builtin: __builtin_va_start, __builtin_va_arg
-    ; These work in freestanding mode (no libc needed)
-    
-    va_list args
-    va_start(args, format_string)
-
-    for each character 'c' in format_string:
-        if c != '%':
-            terminal_putchar(c)
-            continue
-
-        ; Read next char after '%'
-        next = next character
-
-        switch next:
-            case 'd':                         ; Decimal integer
-                num = va_arg(args, int)
-                if num < 0:
-                    terminal_putchar('-')
-                    num = -num
-                itoa(num, buffer, 10)
-                terminal_print(buffer)
-
-            case 'x':                         ; Hexadecimal
-                num = va_arg(args, unsigned int)
-                terminal_print("0x")
-                itoa(num, buffer, 16)
-                terminal_print(buffer)
-
-            case 's':                         ; String
-                str = va_arg(args, char*)
-                if str == NULL:
-                    terminal_print("(null)")
-                else:
-                    terminal_print(str)
-
-            case 'c':                         ; Single char
-                ch = va_arg(args, int)        ; char promoted to int
-                terminal_putchar(ch)
-
-            case '%':                         ; Literal %
-                terminal_putchar('%')
-
-    va_end(args)
-```
 
 **What to verify:**
 - [ ] `printk("Hello %s\n", "World")` → "Hello World"
@@ -480,27 +270,6 @@ notify the CPU. Without this, pressing keys does nothing.
 ;          which CONFLICT with CPU exception handlers!
 ; Solution: Remap IRQs to start at INT 0x20
 
-function pic_init():
-    ; Send initialization sequence to both PICs
-    ; PIC1 (master): handles IRQ 0-7
-    ; PIC2 (slave):  handles IRQ 8-15
-
-    outb(0x20, 0x11)     ; ICW1: begin init of master PIC
-    outb(0xA0, 0x11)     ; ICW1: begin init of slave PIC
-
-    outb(0x21, 0x20)     ; ICW2: master IRQ 0-7  → INT 0x20-0x27
-    outb(0xA1, 0x28)     ; ICW2: slave  IRQ 8-15 → INT 0x28-0x2F
-
-    outb(0x21, 0x04)     ; ICW3: master has slave on IRQ2
-    outb(0xA1, 0x02)     ; ICW3: slave cascade identity
-
-    outb(0x21, 0x01)     ; ICW4: 8086 mode
-    outb(0xA1, 0x01)     ; ICW4: 8086 mode
-
-    ; Unmask only IRQ1 (keyboard)
-    outb(0x21, 0xFD)     ; Master mask: 11111101 → only IRQ1 enabled
-    outb(0xA1, 0xFF)     ; Slave mask:  all disabled
-
 ; ── IDT Setup ─────────────────────────────────
 ; IDT = array of 256 entries, each 8 bytes
 ; Each entry says: "For interrupt N, jump to address X"
@@ -515,24 +284,6 @@ struct idt_entry:
 idt_entries[256]               ; Full IDT table
 idt_pointer = { size: 256*8-1, address: &idt_entries }
 
-function idt_set_gate(index, handler_address):
-    idt_entries[index].offset_low  = handler_address & 0xFFFF
-    idt_entries[index].selector    = 0x08           ; Kernel code segment
-    idt_entries[index].zero        = 0
-    idt_entries[index].type_attr   = 0x8E           ; Present, ring 0, interrupt gate
-    idt_entries[index].offset_high = handler_address >> 16
-
-function idt_init():
-    memset(idt_entries, 0, sizeof(idt_entries))
-
-    pic_init()                                      ; Remap PIC first
-    idt_set_gate(0x21, &keyboard_handler_wrapper)   ; IRQ1 → INT 0x21
-
-    ; Load IDT into CPU using LIDT instruction (ASM)
-    asm: lidt [idt_pointer]
-
-    ; Enable interrupts
-    asm: sti
 
 ; ── ASM Interrupt Wrapper ─────────────────────
 ; CPU doesn't save all registers on interrupt.
@@ -725,62 +476,6 @@ function terminal_handle_input(ascii_char):
 
 ---
 
-### STEP 11 — Update kernel_main (Putting It All Together)
-> Concepts: [[Kernel (operating system)]]
-
-**File: `kernel.c` (final version)**
-
-```
-function kernel_main():
-    ; 1. Initialize display
-    terminal_clear()
-    enable_cursor()
-
-    ; 2. Initialize multi-screen system
-    terminals_init()
-
-    ; 3. Initialize interrupt system
-    idt_init()              ; Sets up IDT + PIC + enables interrupts
-
-    ; 4. Print welcome message using printk
-    set_color(LIGHT_GREEN, BLACK)
-    printk("=== KFS-1 Kernel ===\n")
-    set_color(WHITE, BLACK)
-    printk("42\n\n")
-    printk("Keyboard ready. Type anything.\n")
-    printk("Alt+1/2/3/4 to switch terminals.\n\n")
-
-    ; 5. Hang — interrupts handle everything from here
-    loop forever:
-        asm: hlt             ; Sleep until next interrupt
-                              ; Keyboard interrupt wakes CPU → handler runs → HLT again
-```
-
----
-
-### Build & Run Order
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  make                                                            │
-│    ├── nasm -f elf32 boot.asm → boot.o                           │
-│    ├── nasm -f elf32 io.asm → io.o                               │
-│    ├── gcc -m32 -ffreestanding kernel.c → kernel.o               │
-│    ├── gcc -m32 -ffreestanding vga.c → vga.o                     │
-│    ├── gcc -m32 -ffreestanding string.c → string.o               │
-│    ├── gcc -m32 -ffreestanding printk.c → printk.o               │
-│    ├── gcc -m32 -ffreestanding idt.c → idt.o                     │
-│    ├── gcc -m32 -ffreestanding pic.c → pic.o                     │
-│    ├── gcc -m32 -ffreestanding keyboard.c → keyboard.o           │
-│    ├── gcc -m32 -ffreestanding terminal.c → terminal.o           │
-│    ├── ld -T linker.ld *.o → kernel.bin                          │
-│    └── grub-mkrescue → kernel.iso                                │
-│                                                                  │
-│  make run                                                        │
-│    └── qemu-system-i386 -cdrom kernel.iso                        │
-└─────────────────────────────────────────────────────────────────┘
-```
-
----
 
 ### Checklist Summary
 
