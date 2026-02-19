@@ -164,8 +164,8 @@ then sets up a stack and calls `kernel_main`.
  */
 
 **What to verify:**
-- [ ] GRUB boots and jumps to our code
-- [ ] `kernel_main()` is called successfully
+- [x] GRUB boots and jumps to our code
+- [x] `kernel_main()` is called successfully
 
 ---
 
@@ -187,8 +187,8 @@ GRUB loads kernels at 1MB (0x100000) — below that is BIOS/hardware memory.
 **What it does**: First C function called. Clears screen, prints "42".
 
 **What to verify:**
-- [ ] "42" appears on screen after boot
-- [ ] Kernel doesn't crash or reboot
+- [x] "42" appears on screen after boot
+- [x] Kernel doesn't crash or reboot
 
 ---
 

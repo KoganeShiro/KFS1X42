@@ -15,18 +15,48 @@
 #error "This tutorial needs to be compiled with a ix86-elf compiler"
 #endif
 
+#define KEYBOARD_PORT 0x60
+#define KEYBOARD_STATUS_PORT 0x64
+
+
 /* VGA text mode constants */
 # define VGA_WIDTH   80
 # define VGA_HEIGHT  25
 # define VGA_MEMORY  0xB8000
 
 /* printk log level */
-
 # define LOG_LEVEL_INFO "[INFO] "
 # define LOG_LEVEL_DEBUG "[DEBUG] "
 # define LOG_LEVEL_WARNING "[WARNING] "
 # define LOG_LEVEL_ERROR "[ERROR] "
 
+/* Special key code */
+#define KEY_ESCAPE      0x01
+#define KEY_BACKSPACE   0x0E
+#define KEY_TAB         0x0F
+#define KEY_ENTER       0x1C
+#define KEY_LCTRL       0x1D
+#define KEY_LSHIFT      0x2A
+#define KEY_RSHIFT      0x36
+#define KEY_LALT        0x38
+#define KEY_CAPSLOCK    0x3A
+#define KEY_F1          0x3B
+#define KEY_F2          0x3C
+#define KEY_F3          0x3D
+#define KEY_F4          0x3E
+#define KEY_F5          0x3F
+#define KEY_F6          0x40
+#define KEY_F7          0x41
+#define KEY_F8          0x42
+#define KEY_F9          0x43
+#define KEY_F10         0x44
+#define KEY_NUMLOCK     0x45
+
+// Arrow keys (extended scancodes, prefixed with 0xE0)
+#define KEY_UP          0x48
+#define KEY_DOWN        0x50
+#define KEY_LEFT        0x4B
+#define KEY_RIGHT       0x4D
 
 
 /* Hardware VGA color palette */
@@ -81,37 +111,18 @@ typedef struct va_list {
 #define va_end(argptr) ((argptr).ptr = NULL)
 
 
-
-
-
 /* Kernel functions */
 void	kfs_initialize(vga_terminal *terminal);
 
 /* printk.c */
+int		printk(vga_terminal *terminal, const char *data, ...);
+/* printk_utils.c */
 void	kfs_putentry_at(vga_terminal *terminal, char c);
 void	kfs_putchar(vga_terminal *terminal, char c);
-int		printk(vga_terminal *terminal, const char *data, ...);
 
 /* handle_keyboard.c */
-/*
-** get_scancode()
-Read a byte from the keyboard's data port (0x60).
-** map_scancode()
-Convert the scancode to a character (e.g., 'a', '1', etc.)
-** process_scancode()
-Call map_scancode() and print it.
-
-** handle_keyboard_keypress()
-call get_scancode() in a loop, and call process_scancode() for each scancode read.
-*/
-/*
-** update_cursor()
-Update terminal->row and terminal->column if arrow keys are pressed.
-*/
-/*
-** handle_screen_shortcut()
-Switch screens when alt+1, alt+2, etc. are pressed.
-*/
+void	handle_keyboard_keypress(vga_terminal *terminal);
+int		handle_screen_shortcut(vga_terminal *terminal, uint8_t scancode);
 
 /* handle_scroll.c */
 /*

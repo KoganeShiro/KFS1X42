@@ -32,10 +32,6 @@ void kfs_initialize(vga_terminal *terminal)
 }
 
 
-/*
-when overflow need to clean the screen and start from the top
-(scroll -> store in a buffer, max will be 30 lines, when overflow, remove the first line and add a new line at the end)
-*/
 void kernel_main(void) 
 {
 	vga_terminal terminal;
@@ -45,8 +41,7 @@ void kernel_main(void)
 
 	print_header(&terminal);
 
-	printk(&terminal, "ptr: %p\n", &terminal);
-	printk(&terminal, "hex of a: %x\n", 'A');
+	printk(&terminal, "ptr: %p ||| hex of a: %x", &terminal, 'A');
 	printk(&terminal, "print char: %c\n", 'A');
 	printk(&terminal, "print int: %i\n", 'A');
 	printk(&terminal, LOG_LEVEL_DEBUG "Kernel initialized successfully!\n");
@@ -54,4 +49,5 @@ void kernel_main(void)
 	printk(&terminal, LOG_LEVEL_WARNING "This is a warning message.\n");
 	printk(&terminal, LOG_LEVEL_ERROR "This is an error message.\n");
 
+	handle_keyboard_keypress(&terminal);
 }
