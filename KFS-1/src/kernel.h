@@ -22,9 +22,12 @@
 
 /* printk log level */
 
-# define LOG_LEVEL_INFO "[INFO]"
-# define LOG_LEVEL_WARNING "[WARNING]"
-# define LOG_LEVEL_ERROR "[ERROR]"
+# define LOG_LEVEL_INFO "[INFO] "
+# define LOG_LEVEL_DEBUG "[DEBUG] "
+# define LOG_LEVEL_WARNING "[WARNING] "
+# define LOG_LEVEL_ERROR "[ERROR] "
+
+
 
 /* Hardware VGA color palette */
 enum vga_color
@@ -58,7 +61,27 @@ typedef struct vga_terminal {
 	size_t column;
 	uint8_t color;
 	uint16_t* buffer;
+	//screens index to write the buffer in
 } vga_terminal;
+
+/* Variadic Arguments */
+//point to the stack (reverse order)
+typedef struct va_list {
+	void* ptr;
+} va_list;
+
+//init the ptr to the last argument
+#define va_start(argptr, last) ((argptr).ptr = (void*)(&(last) + 1))
+
+//cast the arg by the type and move the ptr to the next argument
+#define va_arg(argptr, type) \
+    (*(type*)((argptr).ptr += sizeof(type) , (char*)(argptr).ptr - sizeof(type)))
+
+//ptr that pointed to the stack to NULL
+#define va_end(argptr) ((argptr).ptr = NULL)
+
+
+
 
 
 /* Kernel functions */
@@ -67,8 +90,7 @@ void	kfs_initialize(vga_terminal *terminal);
 /* printk.c */
 void	kfs_putentry_at(vga_terminal *terminal, char c);
 void	kfs_putchar(vga_terminal *terminal, char c);
-void	printk(vga_terminal *terminal, const char *data, ...);
-
+int		printk(vga_terminal *terminal, const char *data, ...);
 
 /* handle_keyboard.c */
 /*
@@ -81,7 +103,7 @@ Call map_scancode() and print it.
 
 ** handle_keyboard_keypress()
 call get_scancode() in a loop, and call process_scancode() for each scancode read.
-
+*/
 /*
 ** update_cursor()
 Update terminal->row and terminal->column if arrow keys are pressed.
@@ -111,10 +133,10 @@ Switch to an existing screen by index.
 */
 
 // Helper functions (utils.c)
-uint16_t vga_entry(unsigned char uc, uint8_t color) ;
-void	kfs_set_color(vga_terminal *terminal, uint8_t color);
-size_t 	strlen(const char* str) ;
-void 	print_header(vga_terminal *terminal) ;
+uint16_t	vga_entry(unsigned char uc, uint8_t color) ;
+void		kfs_set_color(vga_terminal *terminal, uint8_t color);
+size_t 		strlen(const char* str) ;
+void 		print_header(vga_terminal *terminal) ;
 
 
 

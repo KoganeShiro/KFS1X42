@@ -22,7 +22,8 @@ SRCDIR  = src
 ASM_SRC = boot/boot.s
 C_SRC   = kernel.c \
 		  utils.c \
-		  printk.c
+		  printk.c \
+		  printk_utils.c
 
 # == Objects ==================================================
 OBJ     = $(OBJDIR)/boot.o $(addprefix $(OBJDIR)/, $(C_SRC:.c=.o))
