@@ -104,9 +104,27 @@ typedef struct vga_terminal {
 	uint8_t color;
 	uint16_t* buffer;
 	uint16_t  cursor_pos;
-	//screens index to write the buffer in
+
+	ring_buffer* ring_buffer;
+
+	int current_screen;
+	screen* screen_list;
 } vga_terminal;
 
+typedef struct screen {
+	vga_terminal terminal;
+	struct screen* next;
+} screen;
+
+typedef struct ring_buffer {
+	size_t row;
+	size_t column;
+	uint8_t color;
+	char buffer[VGA_WIDTH * VGA_HEIGHT * 30]; // Buffer for 30 lines of text
+	size_t visible_start;
+	size_t current_line;
+	size_t total_lines;
+} ring_buffer;
 
 /* Variadic Arguments */
 //point to the stack (reverse order)
@@ -174,6 +192,10 @@ Switch to an existing screen by index.
 uint16_t	vga_entry(unsigned char uc, uint8_t color) ;
 void		kfs_set_color(vga_terminal *terminal, uint8_t color);
 size_t 		strlen(const char* str) ;
+void* 		memmove(void* dstptr, const void* srcptr, size_t size);
+int 		memcmp(const void* aptr, const void* bptr, size_t size);
+void* 		memset(void* bufptr, int value, size_t size);
+void* 		memcpy(void* restrict dstptr, const void* restrict srcptr, size_t size);
 void 		print_header(vga_terminal *terminal) ;
 
 

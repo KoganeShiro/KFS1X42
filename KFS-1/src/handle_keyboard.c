@@ -94,7 +94,7 @@ static int is_shift_pressed(uint8_t scancode, int shift_pressed)
 }
 
 // Handle backspace: move cursor back and print space
-//TODO: handle backspace when at the beginning of a line (move to end of previous line)
+//TODO: move the remain char to the left
 static void handle_backspace(vga_terminal *terminal)
 {
     if (terminal->column > 0) {
