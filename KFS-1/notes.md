@@ -259,12 +259,12 @@ RED (4) | BLACK (0) << 4 = 0x04 = 0000 0100
                             ││││ ╰───> Red foreground
                             ╰────────> Black background
 
-**What it does**: `printk("Hello %s, val=%d hex=%x", name, 42, 0xFF)`
+**What it does**: `printk("Hello %s, val=%d hex=%x", name, 42, GET_LOWER_8B_MASK)`
 
 
 **What to verify:**
 - [ ] `printk("Hello %s\n", "World")` → "Hello World"
-- [ ] `printk("Dec: %d Hex: %x\n", 255, 255)` → "Dec: 255 Hex: 0xFF"
+- [ ] `printk("Dec: %d Hex: %x\n", 255, 255)` → "Dec: 255 Hex: GET_LOWER_8B_MASK"
 - [ ] `printk("100%%\n")` → "100%"
 
 ---

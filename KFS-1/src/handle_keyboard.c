@@ -94,20 +94,49 @@ static int is_shift_pressed(uint8_t scancode, int shift_pressed)
 }
 
 // Handle backspace: move cursor back and print space
+//TODO: handle backspace when at the beginning of a line (move to end of previous line)
 static void handle_backspace(vga_terminal *terminal)
 {
     if (terminal->column > 0) {
         terminal->column--;
-    } else if (terminal->row > 0) {
-        terminal->row--;
-        terminal->column = VGA_WIDTH - 1;
     }
-    kfs_putentry_at(terminal, ' '); // Clear the character at the current position
+    kfs_putentry_at(terminal, '\0');
     return;
+}
+
+// Check if there's a character at the given position (not '\0')
+static int has_char_at(vga_terminal *terminal, int cursor_pos)
+{
+    uint16_t entry = terminal->buffer[cursor_pos];
+    char c = (char)(entry & GET_LOWER_8B_MASK);  // Extract character from VGA entry
+    return (c != '\0');
+}
+
+// Handle arrow keys: move cursor only through existing text
+static int handle_arrow_keys(vga_terminal *terminal, uint8_t scancode)
+{
+    switch (scancode) {
+        case KEY_UP:
+        case KEY_DOWN:
+            return (1);
+        case KEY_LEFT:
+            if (terminal->column > 0 && has_char_at(terminal, terminal->cursor_pos - 1)) {
+                terminal->column--;
+            }
+            return (1);
+        case KEY_RIGHT:
+            if (terminal->column < VGA_WIDTH - 1 && has_char_at(terminal, terminal->cursor_pos)) {
+                terminal->column++;
+            }
+            return (1);
+        default:
+            return (0);
+    }
 }
 
 /*
 ** process_scancode()
+Handle special keys (Enter, Backspace, Arrow keys).
 Call map_scancode() and print it.
 */
 static void process_scancode(vga_terminal *terminal, uint8_t scancode)
@@ -123,6 +152,9 @@ static void process_scancode(vga_terminal *terminal, uint8_t scancode)
         handle_backspace(terminal);
         return;
     }
+    if (handle_arrow_keys(terminal, scancode) == 1) {
+        return; 
+    }
 
     char c = map_scancode(scancode, shift_pressed);
     if (c) {
@@ -136,7 +168,6 @@ call get_scancode() in a loop, and call process_scancode() for each scancode rea
 */
 void handle_keyboard_keypress(vga_terminal *terminal)
 {
-    //init cursor position
     while (1) {
         uint8_t scancode = get_scancode();
         
@@ -146,7 +177,7 @@ void handle_keyboard_keypress(vga_terminal *terminal)
                 continue; // If it was a screen shortcut, skip normal processing
             }
             process_scancode(terminal, scancode);
-            //update cursor
+            update_cursor_pos(terminal);
         }
     }
 }

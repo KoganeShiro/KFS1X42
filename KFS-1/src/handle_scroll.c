@@ -1,7 +1,8 @@
 #include "kernel.h"
 
 /* handle_scroll.c */
-/*
+/* how the vga screen work under the hood when we can scroll ?
+
 **  terminal_scroll() 
 ** Called when the cursor moves past the last row.
 ** 1. Copy every row UP by one:
@@ -21,7 +22,7 @@ void clear_screen(void)
     int index = 0;
     
     while (index < 80 * 25 * 2) {
-            terminal_buffer[index] = ' ';
+            terminal_buffer[index] = '\0';
             index += 2;
     }
 }

@@ -19,14 +19,13 @@ static inline uint8_t vga_entry_color(enum vga_color fg, enum vga_color bg)
 void kfs_initialize(vga_terminal *terminal) 
 {
 	terminal->buffer = (uint16_t*)VGA_MEMORY;
-	terminal->row = 0;
-	terminal->column = 0;
+	initialize_cursor_pos(terminal);
 	terminal->color = vga_entry_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
 	
 	for (size_t y = 0; y < VGA_HEIGHT; y++) {
 		for (size_t x = 0; x < VGA_WIDTH; x++) {
 			const size_t index = y * VGA_WIDTH + x;
-			terminal->buffer[index] = vga_entry(' ', terminal->color);
+			terminal->buffer[index] = vga_entry('\0', terminal->color);
 		}
 	}
 }

@@ -15,13 +15,20 @@
 #error "This tutorial needs to be compiled with a ix86-elf compiler"
 #endif
 
+#define GET_LOWER_8B_MASK 0xFF // Mask to extract character from VGA entry (lower 8 bits)
+
 #define KEYBOARD_PORT 0x60
 #define KEYBOARD_STATUS_PORT 0x64
 // Bit 7 set indicates key release
 #define KEY_RELEASE_MASK 0x80 
 
-#define CURSOR
-
+/* VGA Cursor Control Ports */
+#define VGA_CTRL_PORT		0x3D4  // VGA control port for cursor position
+#define VGA_DATA_PORT  		0x3D5  // VGA data port for cursor position
+#define VGA_CURSOR_START   		0x0A   // Cursor start scanline register (also enables/disables cursor)
+#define VGA_CURSOR_END     		0x0B   // Cursor end scanline register
+#define VGA_CURSOR_HIGH_REGISTER   		0x0E   // Cursor location high byte register
+#define VGA_CURSOR_LOW_REGISTER    		0x0F   // Cursor location low byte register
 
 /* VGA text mode constants */
 # define VGA_WIDTH   80
@@ -96,6 +103,7 @@ typedef struct vga_terminal {
 	size_t column;
 	uint8_t color;
 	uint16_t* buffer;
+	uint16_t  cursor_pos;
 	//screens index to write the buffer in
 } vga_terminal;
 
@@ -138,6 +146,10 @@ void	handle_keyboard_keypress(vga_terminal *terminal);
 
 /* handle_screen_shortcut.c */
 int		handle_screen_shortcut(vga_terminal *terminal, uint8_t scancode);
+
+/* handle_cursor.c */
+void	initialize_cursor_pos(vga_terminal *terminal);
+void	update_cursor_pos(vga_terminal *terminal);
 
 /* handle_scroll.c */
 /*

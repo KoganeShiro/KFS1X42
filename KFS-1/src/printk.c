@@ -193,6 +193,7 @@ int printk(vga_terminal *terminal, const char *data, ...)
 	}
 	va_end(args);
 	terminal->color = saved_color;
+	update_cursor_pos(terminal);
     return (length);
 }
 

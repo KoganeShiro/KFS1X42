@@ -17,6 +17,13 @@ uint8_t inb(uint16_t port)
     return (ret);
 }
 
+/*
+** outb() - Write byte to I/O port
+    The outb instruction will take the value from the AL register and write it to the specified port.
+* outb is an x86 assembly instruction meaning "output byte"
+* %0 is the value to write (stored in AL register)
+* %1 is the port number (stored in DX register or as immediate value)
+*/
 void outb(uint16_t port, uint8_t val)
 {
     asm volatile ("outb %0, %1" : : "a"(val), "Nd"(port));
