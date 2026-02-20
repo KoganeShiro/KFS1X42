@@ -17,6 +17,10 @@
 
 #define KEYBOARD_PORT 0x60
 #define KEYBOARD_STATUS_PORT 0x64
+// Bit 7 set indicates key release
+#define KEY_RELEASE_MASK 0x80 
+
+#define CURSOR
 
 
 /* VGA text mode constants */
@@ -80,6 +84,7 @@ enum vga_color
 	VGA_COLOR_WHITE         = 15,
 };
 
+
 /*
 **   - row:    current cursor row      (size_t)
 **   - column: current cursor column   (size_t)
@@ -93,6 +98,7 @@ typedef struct vga_terminal {
 	uint16_t* buffer;
 	//screens index to write the buffer in
 } vga_terminal;
+
 
 /* Variadic Arguments */
 //point to the stack (reverse order)
@@ -111,17 +117,26 @@ typedef struct va_list {
 #define va_end(argptr) ((argptr).ptr = NULL)
 
 
+
 /* Kernel functions */
 void	kfs_initialize(vga_terminal *terminal);
 
 /* printk.c */
 int		printk(vga_terminal *terminal, const char *data, ...);
 /* printk_utils.c */
-void	kfs_putentry_at(vga_terminal *terminal, char c);
-void	kfs_putchar(vga_terminal *terminal, char c);
+int		kfs_putentry_at(vga_terminal *terminal, char c);
+int		kfs_putchar(vga_terminal *terminal, char c);
+
+/* io.c */
+uint8_t inb(uint16_t port);
+void 	outb(uint16_t port, uint8_t val);
+void 	outw(uint16_t port, uint16_t val);
+
 
 /* handle_keyboard.c */
 void	handle_keyboard_keypress(vga_terminal *terminal);
+
+/* handle_screen_shortcut.c */
 int		handle_screen_shortcut(vga_terminal *terminal, uint8_t scancode);
 
 /* handle_scroll.c */

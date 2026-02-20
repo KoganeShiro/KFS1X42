@@ -65,18 +65,46 @@ static char* itoh(unsigned int value, char* buffer, char *hexa)
 }
 
 
-static void kfs_putstr(vga_terminal *terminal, const char* data, size_t size) 
+static int kfs_putstr(vga_terminal *terminal, const char* data, size_t size) 
 {
 	for (size_t i = 0; i < size; i++)
 		kfs_putchar(terminal, data[i]);
 
-    return;
+    return (size);
+}
+
+static int kfs_putint(vga_terminal *terminal, int value) 
+{
+	char buffer[12];
+
+	itoa(value, buffer);
+	return (kfs_putstr(terminal, buffer, strlen(buffer)));
+}
+
+static int kfs_puthex(vga_terminal *terminal, unsigned int value, char *hexa) 
+{
+	char buffer[32];
+
+	itoh(value, buffer, hexa);
+	return (kfs_putstr(terminal, buffer, strlen(buffer)));
+}
+
+static int kfs_puthexptr(vga_terminal *terminal, void *ptr) 
+{
+	unsigned int addr = (unsigned int)ptr;
+	char buffer[32];
+	int length = 0;
+
+	length += kfs_putstr(terminal, "0x", 2);
+	itoh(addr, buffer, "0123456789abcdef");
+	length += kfs_putstr(terminal, buffer, strlen(buffer));
+	return (length);
 }
 
 /*
 ** Check if string starts with given prefix
 */
-static bool starts_with(const char* data, const char* log_level)
+static bool do_starts_with(const char* data, const char* log_level)
 {
 	while (*log_level) {
 		if (*data != *log_level)
@@ -95,27 +123,52 @@ static bool starts_with(const char* data, const char* log_level)
 static size_t parse_log_level(vga_terminal *terminal, const char* data)
 {
 	int length = 0;
-	if (starts_with(data, LOG_LEVEL_INFO)) {
+	if (do_starts_with(data, LOG_LEVEL_INFO)) {
 		kfs_set_color(terminal, vga_entry(VGA_COLOR_LIGHT_CYAN, VGA_COLOR_BLACK));
-		length = strlen(LOG_LEVEL_INFO);
-		kfs_putstr(terminal, LOG_LEVEL_INFO, length);
+		length = kfs_putstr(terminal, LOG_LEVEL_INFO, length);
 	}
-	else if (starts_with(data, LOG_LEVEL_DEBUG)) {
+	else if (do_starts_with(data, LOG_LEVEL_DEBUG)) {
 		kfs_set_color(terminal, vga_entry(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK));
-		length = strlen(LOG_LEVEL_DEBUG);
-		kfs_putstr(terminal, LOG_LEVEL_DEBUG, length);
+		length = kfs_putstr(terminal, LOG_LEVEL_DEBUG, length);
 	}
-	else if (starts_with(data, LOG_LEVEL_WARNING)) {
+	else if (do_starts_with(data, LOG_LEVEL_WARNING)) {
 		kfs_set_color(terminal, vga_entry(VGA_COLOR_LIGHT_BROWN, VGA_COLOR_BLACK));
-		length = strlen(LOG_LEVEL_WARNING);
-		kfs_putstr(terminal, LOG_LEVEL_WARNING, length);
+		length = kfs_putstr(terminal, LOG_LEVEL_WARNING, length);
 	}
-	else if (starts_with(data, LOG_LEVEL_ERROR)) {
+	else if (do_starts_with(data, LOG_LEVEL_ERROR)) {
 		kfs_set_color(terminal, vga_entry(VGA_COLOR_LIGHT_RED, VGA_COLOR_BLACK));
-		length = strlen(LOG_LEVEL_ERROR);
-		kfs_putstr(terminal, LOG_LEVEL_ERROR, length);
+		length = kfs_putstr(terminal, LOG_LEVEL_ERROR, length);
 	}
 	return (length);
+}
+
+static int format_specifier_handler(vga_terminal *terminal, char specifier, va_list *args)
+{
+	switch (specifier) {
+		case 'd':
+		case 'i': {
+			return (kfs_putint(terminal, va_arg(*args, int)));
+		}
+		case 's': {
+			const char* str = va_arg(*args, const char*);
+			return (kfs_putstr(terminal, str, strlen(str)));
+		}
+		case 'c': {
+			char c = (char)va_arg(*args, int);
+			return (kfs_putchar(terminal, c));
+		}
+		case 'x': {
+			return (kfs_puthex(terminal, va_arg(*args, unsigned int), "0123456789abcdef"));
+		}
+		case 'X': {
+			return (kfs_puthex(terminal, va_arg(*args, unsigned int), "0123456789ABCDEF"));
+		}
+		case 'p': {
+			return (kfs_puthexptr(terminal, va_arg(*args, void*)));
+		}
+		default:
+			return (kfs_putchar(terminal, '%') + kfs_putchar(terminal, specifier));
+	}
 }
 
 /*
@@ -133,62 +186,9 @@ int printk(vga_terminal *terminal, const char *data, ...)
 	for(size_t i = length; data[i] != '\0'; i++) {
 		if (data[i] == '%') {
 			i++;
-			switch (data[i]) {
-				case 'd':
-				case 'i': {
-					int num = va_arg(args, int);
-					char buffer[32];
-					itoa(num, buffer);
-					kfs_putstr(terminal, buffer, strlen(buffer));
-					length += strlen(buffer);
-					break;
-				}
-				case 's': {
-					const char* str = va_arg(args, const char*);
-					kfs_putstr(terminal, str, strlen(str));
-					length += strlen(str);
-					break;
-				}
-				case 'c': {
-					char c = (char)va_arg(args, int);
-					kfs_putchar(terminal, c);
-					length++;
-					break;
-				}
-				case 'x': {
-					unsigned int num = va_arg(args, unsigned int);
-					char buffer[32];
-					itoh(num, buffer, "0123456789abcdef"); 
-					kfs_putstr(terminal, buffer, strlen(buffer));
-					length += strlen(buffer);
-					break;
-				}
-				case 'X': {
-					unsigned int num = va_arg(args, unsigned int);
-					char buffer[32];
-					itoh(num, buffer, "0123456789ABCDEF");
-					kfs_putstr(terminal, buffer, strlen(buffer));
-					length += strlen(buffer);
-					break;
-				}
-				case 'p': {
-					void* ptr = va_arg(args, void*);
-					unsigned int addr = (unsigned int)ptr;
-					char buffer[32];
-					kfs_putstr(terminal, "0x", 2);
-					itoh(addr, buffer, "0123456789abcdef");
-					kfs_putstr(terminal, buffer, strlen(buffer));
-					length += strlen(buffer) + 2;
-					break;
-				}
-				default:
-					kfs_putchar(terminal, '%');
-					kfs_putchar(terminal, data[i]);
-					length += 2;
-			}
+			length += format_specifier_handler(terminal, data[i], &args);
 		} else {
-			kfs_putchar(terminal, data[i]);
-			length++;
+			length += kfs_putchar(terminal, data[i]);
 		}
 	}
 	va_end(args);

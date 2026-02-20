@@ -24,7 +24,9 @@ C_SRC   = kernel.c \
 		  utils.c \
 		  printk.c \
 		  printk_utils.c \
-		  handle_keyboard.c
+		  handle_keyboard.c \
+		  io_keyboard_utils.c \
+		  handle_screen_shortcut.c 
 
 # == Objects ==================================================
 OBJ     = $(OBJDIR)/boot.o $(addprefix $(OBJDIR)/, $(C_SRC:.c=.o))
