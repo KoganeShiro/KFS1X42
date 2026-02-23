@@ -34,6 +34,8 @@
 # define VGA_WIDTH   80
 # define VGA_HEIGHT  25
 # define VGA_MEMORY  0xB8000
+# define VGA_BUFFER_SIZE (VGA_WIDTH * VGA_HEIGHT)
+# define MAX_SCREENS 9
 
 /* printk log level */
 # define LOG_LEVEL_INFO "[INFO] "
@@ -111,21 +113,28 @@ typedef struct ring_buffer {
 **   - color:  current text color byte (uint8_t)
 **   - buffer: pointer to VGA memory   (uint16_t *)
 */
+/*
+** Per-screen state:
+**   - buffer:       active write target (VGA_MEMORY for active screen, saved_buffer for inactive)
+**   - saved_buffer: always points to this screen's private RAM copy (static allocation)
+**                   on switch_screen: memcpy(VGA <-> saved_buffer)
+*/
 typedef struct screen {
     size_t          row;
     size_t          column;
     uint8_t         color;
-    uint16_t*       buffer;        /* points to VGA_MEMORY or saved buffer */
+    uint16_t*       buffer;        /* active write target: VGA_MEMORY or saved_buffer */
+    uint16_t*       saved_buffer;  /* always points to this screen's private RAM copy */
     uint16_t        cursor_pos;
     int             screen_id;
     ring_buffer*    history;       /* scroll-back history for this screen */
-    struct screen*  next;          /* linked list of screens */
 } screen;
 
 /* Global kernel state */
 typedef struct kfs {
 	int current_screen;
-	screen* screen_list;
+	int total_screens;
+	screen screens[MAX_SCREENS];
 } kfs;
 
 
@@ -175,10 +184,10 @@ void 	outw(uint16_t port, uint16_t val);
 void	handle_keyboard_keypress(kfs *k);
 
 /* handle_screen_shortcut.c */
-int		handle_screen_shortcut(kfs *k, uint8_t scancode);
+bool		handle_screen_shortcut(kfs *k, uint8_t scancode);
 
 /* keymap.c */
-char	keymap_translate(uint8_t scancode, int shift_pressed);
+char	keymap_translate(screen *scr,uint8_t scancode, bool shift_pressed);
 
 
 /* handle_cursor.c */
@@ -197,12 +206,7 @@ void	update_cursor_pos(screen *scr);
 */
 
 /* handle_screen.c */
-/*
-* add_screen()
-Add a new screen to the list of screens, and switch to it.
-* switch_screen()
-Switch to an existing screen by index.
-*/
+void	switch_screen(kfs *k, int screen_index);
 
 /*
 parsing.c

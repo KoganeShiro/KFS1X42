@@ -32,18 +32,33 @@ static inline uint8_t get_scancode(void)
     return (0);
 }
 
-static int is_shift_pressed(uint8_t scancode, int shift_pressed)
+static bool is_shift_pressed(screen *scr, uint8_t scancode, bool shift_pressed)
 {
-    if (shift_pressed == 1 && scancode == KEY_CAPSLOCK) {
-        return (0); // Caps Lock toggles shift state
-    } else if (shift_pressed == 0 && scancode == KEY_CAPSLOCK) {
-        return (1); // Caps Lock toggles shift state
+    if (shift_pressed == true && scancode == KEY_CAPSLOCK) {
+        return (false); 
+    } else if (shift_pressed == false && scancode == KEY_CAPSLOCK) {
+        return (true);
     } else if (scancode == KEY_LSHIFT || scancode == KEY_RSHIFT) {
-        return (1); // Shift key pressed
+        return (true); 
     } else if (scancode == (KEY_LSHIFT | KEY_RELEASE_MASK) || scancode == (KEY_RSHIFT | KEY_RELEASE_MASK)) {
-        return (0); // Shift key released
+        return (false);
     }
-    return (shift_pressed); // No change in shift state
+    // printk(scr, LOG_LEVEL_DEBUG"is_shift_pressed:=%d\n", shift_pressed);
+    return (shift_pressed);
+}
+
+static void shift_left_from_cursor(screen *scr)
+{
+    // Calculate buffer positions
+    int line_start = scr->row * VGA_WIDTH + scr->column;
+    int line_end   = scr->row * VGA_WIDTH + (VGA_WIDTH - 1);
+
+    // Shift everything from (column+1) to end-of-line LEFT by one slot
+    memmove(&scr->buffer[line_start],
+            &scr->buffer[line_start + 1],
+            (line_end - line_start) * sizeof(uint16_t));
+
+    scr->buffer[line_end] = vga_entry('\0', scr->color);
 }
 
 // Handle backspace: move cursor back and print space
@@ -52,8 +67,8 @@ static void handle_backspace(screen *scr)
 {
     if (scr->column > 0) {
         scr->column--;
+        shift_left_from_cursor(scr);
     }
-    kfs_putentry(scr, '\0');
     return;
 }
 
@@ -63,6 +78,7 @@ static int handle_arrow_keys(screen *scr, uint8_t scancode)
     switch (scancode) {
         case KEY_UP:
         case KEY_DOWN:
+        // command history like readline ?
             return (1);
         case KEY_LEFT:
             if (scr->column > 0 && has_char_at(scr, scr->cursor_pos - 1)) {
@@ -86,9 +102,13 @@ Call map_scancode() and print it.
 */
 static void process_scancode(screen *scr, uint8_t scancode)
 {
-    static int shift_pressed = 0;
+    static bool shift_pressed = 0;
 
-    shift_pressed = is_shift_pressed(scancode, shift_pressed);
+    // printk(scr, LOG_LEVEL_DEBUG"init shift_pressed = %d\n", shift_pressed);
+
+    shift_pressed = is_shift_pressed(scr, scancode, shift_pressed);
+
+    // printk(scr, LOG_LEVEL_DEBUG"process shift_pressed = %d\n",shift_pressed);
     if (scancode == KEY_ENTER) {
         kfs_putchar(scr, '\n');
         return;
@@ -101,7 +121,7 @@ static void process_scancode(screen *scr, uint8_t scancode)
         return; 
     }
 
-    char c = keymap_translate(scancode, shift_pressed);
+    char c = keymap_translate(scr, scancode, shift_pressed);
     if (c) {
         kfs_putchar(scr, c);
     }

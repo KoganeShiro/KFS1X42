@@ -33,6 +33,7 @@ int kfs_putchar(screen *scr, char c)
 		scr->column = 0;
 		if (++scr->row == VGA_HEIGHT)
 			scr->row = 0;
+			//call scroll function
 	}
     return (1);
 }
