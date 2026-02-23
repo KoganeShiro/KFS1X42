@@ -92,39 +92,42 @@ enum vga_color
 };
 
 
+/* Forward declarations */
+typedef struct screen screen;
+typedef struct ring_buffer ring_buffer;
+
+/* Scroll-back ring buffer (text storage only) */
+typedef struct ring_buffer {
+    char    buffer[VGA_WIDTH * VGA_HEIGHT * 30];
+    size_t  visible_start;
+    size_t  current_line;
+    size_t  total_lines;
+} ring_buffer;
+
 /*
+** Per-screen state:
 **   - row:    current cursor row      (size_t)
 **   - column: current cursor column   (size_t)
 **   - color:  current text color byte (uint8_t)
 **   - buffer: pointer to VGA memory   (uint16_t *)
 */
-typedef struct vga_terminal {
-	size_t row;
-	size_t column;
-	uint8_t color;
-	uint16_t* buffer;
-	uint16_t  cursor_pos;
-
-	ring_buffer* ring_buffer;
-
-	int current_screen;
-	screen* screen_list;
-} vga_terminal;
-
 typedef struct screen {
-	vga_terminal terminal;
-	struct screen* next;
+    size_t          row;
+    size_t          column;
+    uint8_t         color;
+    uint16_t*       buffer;        /* points to VGA_MEMORY or saved buffer */
+    uint16_t        cursor_pos;
+    int             screen_id;
+    ring_buffer*    history;       /* scroll-back history for this screen */
+    struct screen*  next;          /* linked list of screens */
 } screen;
 
-typedef struct ring_buffer {
-	size_t row;
-	size_t column;
-	uint8_t color;
-	char buffer[VGA_WIDTH * VGA_HEIGHT * 30]; // Buffer for 30 lines of text
-	size_t visible_start;
-	size_t current_line;
-	size_t total_lines;
-} ring_buffer;
+/* Global kernel state */
+typedef struct kfs {
+	int current_screen;
+	screen* screen_list;
+} kfs;
+
 
 /* Variadic Arguments */
 //point to the stack (reverse order)
@@ -144,30 +147,43 @@ typedef struct va_list {
 
 
 
+/* Get the currently active screen */
+screen*	kfs_active_screen(kfs *k);
+
 /* Kernel functions */
-void	kfs_initialize(vga_terminal *terminal);
+void	kfs_initialize(kfs *k);
 
 /* printk.c */
-int		printk(vga_terminal *terminal, const char *data, ...);
-/* printk_utils.c */
-int		kfs_putentry_at(vga_terminal *terminal, char c);
-int		kfs_putchar(vga_terminal *terminal, char c);
+int		printk(screen *scr, const char *data, ...);
+/* convert.c */
+char* 	itoa(int value, char* buffer);
+char* itoh(unsigned int value, char* buffer, char *hexa);
+char* reverse_str(char* buffer);
 
-/* io.c */
+
+/* vga_write.c */
+int		kfs_putentry(screen *scr, char c);
+int		kfs_putchar(screen *scr, char c);
+
+/* port_io.c */
 uint8_t inb(uint16_t port);
 void 	outb(uint16_t port, uint8_t val);
 void 	outw(uint16_t port, uint16_t val);
 
 
 /* handle_keyboard.c */
-void	handle_keyboard_keypress(vga_terminal *terminal);
+void	handle_keyboard_keypress(kfs *k);
 
 /* handle_screen_shortcut.c */
-int		handle_screen_shortcut(vga_terminal *terminal, uint8_t scancode);
+int		handle_screen_shortcut(kfs *k, uint8_t scancode);
+
+/* keymap.c */
+char	keymap_translate(uint8_t scancode, int shift_pressed);
+
 
 /* handle_cursor.c */
-void	initialize_cursor_pos(vga_terminal *terminal);
-void	update_cursor_pos(vga_terminal *terminal);
+void	initialize_cursor_pos(screen *scr);
+void	update_cursor_pos(screen *scr);
 
 /* handle_scroll.c */
 /*
@@ -188,15 +204,29 @@ Add a new screen to the list of screens, and switch to it.
 Switch to an existing screen by index.
 */
 
-// Helper functions (utils.c)
+/*
+parsing.c
+create a micro posix shell where it could execute "clear" command
+
+
+Global Descriptor Table (GDT) and Interrupt Descriptor Table (IDT) setup
+	(ONLY THINK OF WHERE IT SHOULD BE CALLED, NOT THE IMPLEMENTATION)
+*/
+
+// Helper functions
+/* vga.c */
 uint16_t	vga_entry(unsigned char uc, uint8_t color) ;
-void		kfs_set_color(vga_terminal *terminal, uint8_t color);
+void		kfs_set_color(screen *scr, uint8_t color);
+
+/* string.c */
 size_t 		strlen(const char* str) ;
 void* 		memmove(void* dstptr, const void* srcptr, size_t size);
 int 		memcmp(const void* aptr, const void* bptr, size_t size);
 void* 		memset(void* bufptr, int value, size_t size);
 void* 		memcpy(void* restrict dstptr, const void* restrict srcptr, size_t size);
-void 		print_header(vga_terminal *terminal) ;
+
+/* print_header.c */
+void 		print_header(screen *scr) ;
 
 
 

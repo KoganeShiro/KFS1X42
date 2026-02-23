@@ -8,7 +8,7 @@ AS      = i686-elf-as
 LD      = i686-elf-gcc
 
 # == Flags =====================================================
-CFLAGS  = -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+CFLAGS  = -std=gnu99 -ffreestanding -O2 -Wall -Wextra -I$(SRCDIR)
 LDFLAGS = -ffreestanding -O2 -nostdlib -lgcc
 
 # == Paths =====================================================
@@ -21,13 +21,19 @@ SRCDIR  = src
 # == Sources ==================================================
 ASM_SRC = boot/boot.s
 C_SRC   = kernel.c \
-		  utils.c \
-		  printk.c \
-		  printk_utils.c \
-		  handle_keyboard.c \
-		  io_keyboard_utils.c \
-		  handle_screen_shortcut.c \
-		  handle_cursor.c
+		  drivers/vga.c \
+		  drivers/vga_write.c \
+		  drivers/handle_cursor.c \
+		  drivers/handle_keyboard.c \
+		  drivers/keymap.c \
+		  drivers/port_io.c \
+		  tty/handle_screen.c \
+		  tty/handle_screen_shortcut.c \
+		  tty/handle_scroll.c \
+		  printk/printk.c \
+		  printk/convert.c \
+		  lib/string.c \
+		  lib/print_header.c
 
 # == Objects ==================================================
 OBJ     = $(OBJDIR)/boot.o $(addprefix $(OBJDIR)/, $(C_SRC:.c=.o))
@@ -67,7 +73,7 @@ re: clean run
 iso: $(ISO)
 
 $(OBJDIR)/%.o: src/%.c
-	mkdir -p $(OBJDIR)
+	mkdir -p $(dir $@)
 	$(CC) -c $< -o $@ $(CFLAGS)
 
 $(OBJDIR)/%.o: boot/%.s
