@@ -45,7 +45,9 @@ SECTIONS
 	/* .bss: Uninitialized data (includes stack) */
 	.bss BLOCK(4K) : ALIGN(4K)
 	{
+		__bss_start = .;
 		*(COMMON)
 		*(.bss)
+		__bss_end = .;
 	}
 }

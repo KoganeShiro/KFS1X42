@@ -60,19 +60,19 @@ static size_t parse_log_level(screen *scr, const char* data)
 	int length = 0;
 	if (str_starts_with(data, LOG_LEVEL_INFO)) {
 		kfs_set_color(scr, vga_entry(VGA_COLOR_LIGHT_CYAN, VGA_COLOR_BLACK));
-		length = kfs_putstr(scr, LOG_LEVEL_INFO, length);
+		length = kfs_putstr(scr, LOG_LEVEL_INFO, strlen(LOG_LEVEL_INFO));
 	}
 	else if (str_starts_with(data, LOG_LEVEL_DEBUG)) {
 		kfs_set_color(scr, vga_entry(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK));
-		length = kfs_putstr(scr, LOG_LEVEL_DEBUG, length);
+		length = kfs_putstr(scr, LOG_LEVEL_DEBUG, strlen(LOG_LEVEL_DEBUG));
 	}
 	else if (str_starts_with(data, LOG_LEVEL_WARNING)) {
 		kfs_set_color(scr, vga_entry(VGA_COLOR_LIGHT_BROWN, VGA_COLOR_BLACK));
-		length = kfs_putstr(scr, LOG_LEVEL_WARNING, length);
+		length = kfs_putstr(scr, LOG_LEVEL_WARNING, strlen(LOG_LEVEL_WARNING));
 	}
 	else if (str_starts_with(data, LOG_LEVEL_ERROR)) {
 		kfs_set_color(scr, vga_entry(VGA_COLOR_LIGHT_RED, VGA_COLOR_BLACK));
-		length = kfs_putstr(scr, LOG_LEVEL_ERROR, length);
+		length = kfs_putstr(scr, LOG_LEVEL_ERROR, strlen(LOG_LEVEL_ERROR));
 	}
 	return (length);
 }

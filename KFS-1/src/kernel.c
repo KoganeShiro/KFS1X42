@@ -35,7 +35,7 @@ static void init_screen(screen *scr, int id)
 	scr->saved_buffer = saved_buffers[id];
 	scr->buffer = scr->saved_buffer;
 	scr->cursor_pos = 0;
-	scr->screen_id = id;
+	scr->screen_id = id + 1;
 	scr->history = &history_pool[id];
 
 	/* Clear this screen's saved buffer */
@@ -58,7 +58,7 @@ void kfs_initialize(kfs *k)
 	k->total_screens = MAX_SCREENS;
 
 	for (int i = 0; i < MAX_SCREENS; i++)
-		init_screen(&k->screens[i], i+1);
+		init_screen(&k->screens[i], i);
 
 	k->screens[0].buffer = (uint16_t*)VGA_MEMORY;
 
@@ -78,12 +78,12 @@ void kernel_main(void)
 	screen *scr = kfs_active_screen(&k);
 
 	print_header(scr);
-	printk(scr, LOG_LEVEL_DEBUG"ptr: %p ||| hex of a: %x", &k, 'A');
-	printk(scr, LOG_LEVEL_DEBUG"print char: %c\n", 'A');
-	printk(scr, LOG_LEVEL_DEBUG"print int: %i\n", 'A');
-	printk(scr, LOG_LEVEL_INFO "Welcome to KFS-1, a simple %d-bit kernel written in C!\n", 32);
-	printk(scr, LOG_LEVEL_WARNING "This is a warning message.\n");
-	printk(scr, LOG_LEVEL_ERROR "This is an error message.\n");
+	// printk(scr, LOG_LEVEL_DEBUG"ptr: %p ||| hex of a: %x", &k, 'A');
+	// printk(scr, LOG_LEVEL_DEBUG"print char: %c\n", 'A');
+	// printk(scr, LOG_LEVEL_DEBUG"print int: %i\n", 'A');
+	// printk(scr, LOG_LEVEL_INFO "Welcome to KFS-1, a simple %d-bit kernel written in C!\n", 32);
+	// printk(scr, LOG_LEVEL_WARNING "This is a warning message.\n");
+	// printk(scr, LOG_LEVEL_ERROR "This is an error message.\n");
 
 	handle_keyboard_keypress(&k);
 }

@@ -43,7 +43,6 @@ static bool is_shift_pressed(screen *scr, uint8_t scancode, bool shift_pressed)
     } else if (scancode == (KEY_LSHIFT | KEY_RELEASE_MASK) || scancode == (KEY_RSHIFT | KEY_RELEASE_MASK)) {
         return (false);
     }
-    // printk(scr, LOG_LEVEL_DEBUG"is_shift_pressed:=%d\n", shift_pressed);
     return (shift_pressed);
 }
 
@@ -102,13 +101,9 @@ Call map_scancode() and print it.
 */
 static void process_scancode(screen *scr, uint8_t scancode)
 {
-    static bool shift_pressed = 0;
-
-    // printk(scr, LOG_LEVEL_DEBUG"init shift_pressed = %d\n", shift_pressed);
+    static int shift_pressed = 0;
 
     shift_pressed = is_shift_pressed(scr, scancode, shift_pressed);
-
-    // printk(scr, LOG_LEVEL_DEBUG"process shift_pressed = %d\n",shift_pressed);
     if (scancode == KEY_ENTER) {
         kfs_putchar(scr, '\n');
         return;
@@ -138,7 +133,7 @@ void handle_keyboard_keypress(kfs *k)
         
         // Only process if we got a valid scancode (not 0)
         if (scancode != 0) {
-            if (handle_screen_shortcut(k, scancode)) {
+            if (handle_screen_shortcut(k, scancode) == true) {
                 continue; // If it was a screen shortcut, skip normal processing
             }
             screen *scr = kfs_active_screen(k);

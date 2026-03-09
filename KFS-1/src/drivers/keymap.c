@@ -48,7 +48,6 @@ char keymap_translate(screen *scr, uint8_t scancode, bool shift_pressed)
         return (0); // Invalid scancode
     }
     if (shift_pressed == true) {
-        // printk(scr, LOG_LEVEL_DEBUG"shift_pressed = '%d'\n", shift_pressed);
         return (scancode_to_ascii_shifted[scancode]);
     } else {
         return (scancode_to_ascii[scancode]);

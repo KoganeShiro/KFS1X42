@@ -10,6 +10,8 @@ LD      = i686-elf-gcc
 # == Flags =====================================================
 CFLAGS  = -std=gnu99 -ffreestanding -O2 -Wall -Wextra -I$(SRCDIR)
 LDFLAGS = -ffreestanding -O2 -nostdlib -lgcc
+# CFLAGS  = -std=gnu99 -ffreestanding -Wall -Wextra -I$(SRCDIR)
+# LDFLAGS = -ffreestanding -nostdlib -lgcc
 
 # == Paths =====================================================
 ISODIR  = isodir

@@ -1,11 +1,11 @@
 #include "kernel.h"
 
-static int is_alt_pressed(uint8_t scancode, int alt_pressed)
+static bool is_alt_pressed(uint8_t scancode, bool alt_pressed)
 {
     if (scancode == KEY_LALT) {
-        return (1); // Alt key pressed
+        return (true); // Alt key pressed
     } else if (scancode == (KEY_LALT + 0x80)) {
-        return (0); // Alt key released
+        return (false); // Alt key released
     }
     return (alt_pressed); // No change in alt state
 }
@@ -17,7 +17,7 @@ Switch screens when alt+1, alt+2, etc. are pressed.
 */
 bool handle_screen_shortcut(kfs *k, uint8_t scancode)
 {
-    static int alt_pressed = 0;
+    static bool alt_pressed = false;
     
     alt_pressed = is_alt_pressed(scancode, alt_pressed);
 

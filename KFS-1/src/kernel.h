@@ -139,21 +139,22 @@ typedef struct kfs {
 
 
 /* Variadic Arguments */
-//point to the stack (reverse order)
-typedef struct va_list {
-	void* ptr;
-} va_list;
+// point to the stack (reverse order)
+// typedef struct va_list {
+// 	void* ptr;
+// } va_list;
 
-//init the ptr to the last argument
-#define va_start(argptr, last) ((argptr).ptr = (void*)(&(last) + 1))
+// //init the ptr to the last argument
+// #define va_start(argptr, last) ((argptr).ptr = (void*)(&(last) + 1))
 
-//cast the arg by the type and move the ptr to the next argument
-#define va_arg(argptr, type) \
-    (*(type*)((argptr).ptr += sizeof(type) , (char*)(argptr).ptr - sizeof(type)))
+// //cast the arg by the type and move the ptr to the next argument
+// #define va_arg(argptr, type) \
+//     (*(type*)((argptr).ptr += sizeof(type) , (char*)(argptr).ptr - sizeof(type)))
 
-//ptr that pointed to the stack to NULL
-#define va_end(argptr) ((argptr).ptr = NULL)
+// //ptr that pointed to the stack to NULL
+// #define va_end(argptr) ((argptr).ptr = NULL)
 
+#include <stdarg.h>
 
 
 /* Get the currently active screen */
@@ -166,8 +167,8 @@ void	kfs_initialize(kfs *k);
 int		printk(screen *scr, const char *data, ...);
 /* convert.c */
 char* 	itoa(int value, char* buffer);
-char* itoh(unsigned int value, char* buffer, char *hexa);
-char* reverse_str(char* buffer);
+char* 	itoh(unsigned int value, char* buffer, char *hexa);
+char* 	reverse_str(char* buffer);
 
 
 /* vga_write.c */
@@ -184,7 +185,7 @@ void 	outw(uint16_t port, uint16_t val);
 void	handle_keyboard_keypress(kfs *k);
 
 /* handle_screen_shortcut.c */
-bool		handle_screen_shortcut(kfs *k, uint8_t scancode);
+bool	handle_screen_shortcut(kfs *k, uint8_t scancode);
 
 /* keymap.c */
 char	keymap_translate(screen *scr,uint8_t scancode, bool shift_pressed);

@@ -47,6 +47,14 @@ _start:
 	/* Setup stack pointer (required for C code) */
 	mov $stack_top, %esp
 
+	/* Zero BSS section (static variables must start at 0) */
+	cld                       /* Clear direction flag: rep stosb must go FORWARD */
+	mov $__bss_start, %edi
+	mov $__bss_end, %ecx
+	sub %edi, %ecx
+	xor %eax, %eax
+	rep stosb
+
 	/* Jump to C kernel */
 	call kernel_main
 
