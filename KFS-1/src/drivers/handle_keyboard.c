@@ -136,6 +136,9 @@ void handle_keyboard_keypress(kfs *k)
             if (handle_screen_shortcut(k, scancode) == true) {
                 continue; // If it was a screen shortcut, skip normal processing
             }
+            if (handle_scroll_key(k, scancode) == true) {
+                continue; // If it was a scroll key, skip normal processing
+            }
             screen *scr = kfs_active_screen(k);
             process_scancode(scr, scancode);
             update_cursor_pos(scr);

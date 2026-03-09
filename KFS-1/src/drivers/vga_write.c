@@ -23,7 +23,7 @@ int kfs_putchar(screen *scr, char c)
 	if (c == '\n') {
 		scr->column = 0;
 		if (++scr->row == VGA_HEIGHT)
-			scr->row = 0;
+			terminal_overflow_down(scr);
 		return (1);
 	}
 	
@@ -32,7 +32,7 @@ int kfs_putchar(screen *scr, char c)
 	if (++scr->column == VGA_WIDTH) {
 		scr->column = 0;
 		if (++scr->row == VGA_HEIGHT)
-			scr->row = 0;
+			terminal_overflow_down(scr);
 			//call scroll function
 	}
     return (1);

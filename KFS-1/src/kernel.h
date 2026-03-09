@@ -4,6 +4,23 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+/* Variadic Arguments */
+// point to the stack (reverse order)
+// typedef struct va_list {
+// 	void* ptr;
+// } va_list;
+
+// //init the ptr to the last argument
+// #define va_start(argptr, last) ((argptr).ptr = (void*)(&(last) + 1))
+
+// //cast the arg by the type and move the ptr to the next argument
+// #define va_arg(argptr, type) \
+//     (*(type*)((argptr).ptr += sizeof(type) , (char*)(argptr).ptr - sizeof(type)))
+
+// //ptr that pointed to the stack to NULL
+// #define va_end(argptr) ((argptr).ptr = NULL)
+
+#include <stdarg.h>
 
 /* Check if the compiler thinks we are targeting the wrong operating system. */
 #if defined(__linux__)
@@ -35,6 +52,7 @@
 # define VGA_HEIGHT  25
 # define VGA_MEMORY  0xB8000
 # define VGA_BUFFER_SIZE (VGA_WIDTH * VGA_HEIGHT)
+# define HISTORY_MAX_LINES (VGA_HEIGHT * 30)
 # define MAX_SCREENS 9
 
 /* printk log level */
@@ -53,17 +71,8 @@
 #define KEY_RSHIFT      0x36
 #define KEY_LALT        0x38
 #define KEY_CAPSLOCK    0x3A
-#define KEY_F1          0x3B
-#define KEY_F2          0x3C
-#define KEY_F3          0x3D
-#define KEY_F4          0x3E
-#define KEY_F5          0x3F
-#define KEY_F6          0x40
-#define KEY_F7          0x41
-#define KEY_F8          0x42
-#define KEY_F9          0x43
-#define KEY_F10         0x44
-#define KEY_NUMLOCK     0x45
+#define KEY_PG_UP       0x49
+#define KEY_PG_DOWN     0x51
 
 // Arrow keys (extended scancodes, prefixed with 0xE0)
 #define KEY_UP          0x48
@@ -98,12 +107,13 @@ enum vga_color
 typedef struct screen screen;
 typedef struct ring_buffer ring_buffer;
 
-/* Scroll-back ring buffer (text storage only) */
+/* Scroll-back ring buffer (stores full VGA entries: char + color) */
 typedef struct ring_buffer {
-    char    buffer[VGA_WIDTH * VGA_HEIGHT * 30];
-    size_t  visible_start;
-    size_t  current_line;
-    size_t  total_lines;
+    uint16_t  buffer[VGA_WIDTH * HISTORY_MAX_LINES];
+    uint16_t  live_snapshot[VGA_BUFFER_SIZE]; /* VGA snapshot taken when entering scroll mode */
+    size_t    current_line;  /* next line to write into (ring head)     */
+    size_t    total_lines;   /* how many lines stored (capped at max)   */
+    size_t    scroll_offset; /* 0 = live view, >0 = scrolled back N lines */
 } ring_buffer;
 
 /*
@@ -138,23 +148,6 @@ typedef struct kfs {
 } kfs;
 
 
-/* Variadic Arguments */
-// point to the stack (reverse order)
-// typedef struct va_list {
-// 	void* ptr;
-// } va_list;
-
-// //init the ptr to the last argument
-// #define va_start(argptr, last) ((argptr).ptr = (void*)(&(last) + 1))
-
-// //cast the arg by the type and move the ptr to the next argument
-// #define va_arg(argptr, type) \
-//     (*(type*)((argptr).ptr += sizeof(type) , (char*)(argptr).ptr - sizeof(type)))
-
-// //ptr that pointed to the stack to NULL
-// #define va_end(argptr) ((argptr).ptr = NULL)
-
-#include <stdarg.h>
 
 
 /* Get the currently active screen */
@@ -205,12 +198,16 @@ void	update_cursor_pos(screen *scr);
 ** 2. Clear the last row:
 **      fill row (VGA_HEIGHT-1) with spaces + current color
 */
+bool	handle_scroll_key(kfs *k, uint8_t scancode);
+void 	terminal_overflow_down(screen *scr) ;	
+
 
 /* handle_screen.c */
 void	switch_screen(kfs *k, int screen_index);
 
+
 /*
-parsing.c
+parsing_command.c
 create a micro posix shell where it could execute "clear" command
 
 
