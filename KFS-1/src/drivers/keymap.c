@@ -42,7 +42,7 @@ static const char scancode_to_ascii_shifted[128] = {
 keyboard mapping table
 Convert the scancode to a character (e.g., 'a', '1', etc.)
 */
-char keymap_translate(screen *scr, uint8_t scancode, bool shift_pressed)
+char keymap_translate(uint8_t scancode, bool shift_pressed)
 {
     if (scancode > 127) {
         return (0); // Invalid scancode

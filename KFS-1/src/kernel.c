@@ -35,6 +35,7 @@ static void init_screen(screen *scr, int id)
 	scr->saved_buffer = saved_buffers[id];
 	scr->buffer = scr->saved_buffer;
 	scr->cursor_pos = 0;
+	scr->cursor_visible = true;
 	scr->screen_id = id + 1;
 	scr->history = &history_pool[id];
 

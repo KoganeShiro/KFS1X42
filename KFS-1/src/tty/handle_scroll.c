@@ -57,37 +57,42 @@ static void scroll_redraw(screen *scr)
 
 static bool scroll_up(screen *scr, ring_buffer *h)
 {
+	scr->cursor_visible = false;
 /* Nothing in history to scroll to */
-   if (h->total_lines == 0)
-      return (true);
-   /* Already scrolled back as far as history allows */
-   if (h->scroll_offset >= h->total_lines)
-      return (true);
-   /* First time leaving live view: snapshot the current VGA */
-   if (h->scroll_offset == 0)
-      memcpy(h->live_snapshot, scr->buffer,
-            VGA_BUFFER_SIZE * sizeof(uint16_t));
-   h->scroll_offset++;
-   scroll_redraw(scr);
-   update_cursor_pos(scr);
-   return (true);
+	if (h->total_lines == 0)
+	   return (true);
+	/* Already scrolled back as far as history allows */
+	if (h->scroll_offset >= h->total_lines)
+	   return (true);
+	/* First time leaving live view: snapshot the current VGA */
+	if (h->scroll_offset == 0)
+	   memcpy(h->live_snapshot, scr->buffer,
+	         VGA_BUFFER_SIZE * sizeof(uint16_t));
+	h->scroll_offset++;
+	scroll_redraw(scr);
+	update_cursor_pos(scr);
+	hide_cursor(scr);
+	return (true);
 }
 
 static bool scroll_down(screen *scr, ring_buffer *h)
 {
-   /* Already at live view */
-		if (h->scroll_offset == 0)
-			return (true);
-		h->scroll_offset--;
-		if (h->scroll_offset == 0) {
-			/* Back to live: restore the snapshot */
-			memcpy(scr->buffer, h->live_snapshot,
-				   VGA_BUFFER_SIZE * sizeof(uint16_t));
-		} else {
-			scroll_redraw(scr);
-		}
-		update_cursor_pos(scr);
+	/* Already at live view */
+	if (h->scroll_offset == 0)
 		return (true);
+	h->scroll_offset--;
+	if (h->scroll_offset == 0) {
+		/* Back to live: restore the snapshot and re-enable cursor */
+		memcpy(scr->buffer, h->live_snapshot,
+			   VGA_BUFFER_SIZE * sizeof(uint16_t));
+		scr->cursor_visible = true;
+		show_cursor(scr);
+	} else {
+		scr->cursor_visible = false;
+		scroll_redraw(scr);
+		hide_cursor(scr);
+	}
+	return (true);
 }
 
 /*

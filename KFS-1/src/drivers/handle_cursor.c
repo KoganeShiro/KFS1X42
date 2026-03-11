@@ -14,22 +14,11 @@
 **   Scanlines 7-8    = Middle cursor (-)
 */
 void initialize_cursor_pos(screen *scr)
-{
-    // Set cursor shape: scanlines 0-15 = full block cursor
-    uint8_t cursor_start = 0;   // Top scanline (0-15)
-    uint8_t cursor_end = 15;    // Bottom scanline (0-15)
-    
-    // Enable cursor and set shape
-    outb(VGA_CTRL_PORT, VGA_CURSOR_START);
-    outb(VGA_DATA_PORT, cursor_start & 0x1F);  // Bit 5=0 enables cursor
-    
-    outb(VGA_CTRL_PORT, VGA_CURSOR_END);
-    outb(VGA_DATA_PORT, cursor_end & 0x1F);
-    
+{    
     // Set cursor position to top-left (0, 0)
     scr->row = 0;
     scr->column = 0;
-    update_cursor_pos(scr);
+    show_cursor(scr);
 }
 
 /*
@@ -56,3 +45,24 @@ void update_cursor_pos(screen *scr)
     outb(VGA_DATA_PORT, (uint8_t)((scr->cursor_pos >> 8) & GET_LOWER_8B_MASK)); 
 }
 
+void hide_cursor(screen *scr)
+{
+    (void)scr;
+    // Setting bit 5 of the cursor start register to 1 disables the cursor.
+    outb(VGA_CTRL_PORT, VGA_CURSOR_START);
+    outb(VGA_DATA_PORT, 0x20); // Bit 5 = 1 to disable cursor
+}
+
+void show_cursor(screen *scr)
+{
+    // Set cursor shape: scanlines 0-15 = full block cursor
+    uint8_t cursor_start = 0;   // Top scanline (0-15)
+    uint8_t cursor_end = 15;    // Bottom scanline (0-15)
+    
+    // Enable cursor and set shape
+    outb(VGA_CTRL_PORT, VGA_CURSOR_START);
+    outb(VGA_DATA_PORT, cursor_start & 0x1F);  // Bit 5=0 enables cursor
+    
+    outb(VGA_CTRL_PORT, VGA_CURSOR_END);
+    outb(VGA_DATA_PORT, cursor_end & 0x1F);
+}

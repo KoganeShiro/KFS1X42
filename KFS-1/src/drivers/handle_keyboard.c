@@ -32,7 +32,7 @@ static inline uint8_t get_scancode(void)
     return (0);
 }
 
-static bool is_shift_pressed(screen *scr, uint8_t scancode, bool shift_pressed)
+static bool is_shift_pressed(uint8_t scancode, bool shift_pressed)
 {
     if (shift_pressed == true && scancode == KEY_CAPSLOCK) {
         return (false); 
@@ -103,7 +103,7 @@ static void process_scancode(screen *scr, uint8_t scancode)
 {
     static int shift_pressed = 0;
 
-    shift_pressed = is_shift_pressed(scr, scancode, shift_pressed);
+    shift_pressed = is_shift_pressed(scancode, shift_pressed);
     if (scancode == KEY_ENTER) {
         kfs_putchar(scr, '\n');
         return;
@@ -116,7 +116,7 @@ static void process_scancode(screen *scr, uint8_t scancode)
         return; 
     }
 
-    char c = keymap_translate(scr, scancode, shift_pressed);
+    char c = keymap_translate(scancode, shift_pressed);
     if (c) {
         kfs_putchar(scr, c);
     }
@@ -140,8 +140,10 @@ void handle_keyboard_keypress(kfs *k)
                 continue; // If it was a scroll key, skip normal processing
             }
             screen *scr = kfs_active_screen(k);
-            process_scancode(scr, scancode);
-            update_cursor_pos(scr);
+            if (scr->cursor_visible == true) {
+                process_scancode(scr, scancode);
+                update_cursor_pos(scr);
+            }
         }
     }
 }

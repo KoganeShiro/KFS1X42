@@ -8,8 +8,9 @@ AS      = i686-elf-as
 LD      = i686-elf-gcc
 
 # == Flags =====================================================
-CFLAGS  = -std=gnu99 -ffreestanding -O2 -Wall -Wextra -I$(SRCDIR)
-LDFLAGS = -ffreestanding -O2 -nostdlib -lgcc
+CFLAGS  = -std=gnu99 -ffreestanding -O2 -Wall -Wextra -I$(SRCDIR) \
+		  -fno-builtin -fno-exceptions -fno-stack-protector
+LDFLAGS = -ffreestanding -O2 -nostdlib -nodefaultlibs -lgcc
 
 # == Paths =====================================================
 ISODIR  = isodir

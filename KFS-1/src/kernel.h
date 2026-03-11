@@ -4,23 +4,24 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+// #include <stdarg.h>
+
 /* Variadic Arguments */
 // point to the stack (reverse order)
-// typedef struct va_list {
-// 	void* ptr;
-// } va_list;
+typedef struct va_list {
+	void* ptr;
+} va_list;
 
-// //init the ptr to the last argument
-// #define va_start(argptr, last) ((argptr).ptr = (void*)(&(last) + 1))
+//init the ptr to the last argument
+#define va_start(argptr, last) ((argptr).ptr = (void*)(&(last) + 1))
 
-// //cast the arg by the type and move the ptr to the next argument
-// #define va_arg(argptr, type) \
-//     (*(type*)((argptr).ptr += sizeof(type) , (char*)(argptr).ptr - sizeof(type)))
+//cast the arg by the type and move the ptr to the next argument
+#define va_arg(argptr, type) \
+    (*(type*)((argptr).ptr += sizeof(type) , (char*)(argptr).ptr - sizeof(type)))
 
-// //ptr that pointed to the stack to NULL
-// #define va_end(argptr) ((argptr).ptr = NULL)
+//ptr that pointed to the stack to NULL
+#define va_end(argptr) ((argptr).ptr = NULL)
 
-#include <stdarg.h>
 
 /* Check if the compiler thinks we are targeting the wrong operating system. */
 #if defined(__linux__)
@@ -132,6 +133,7 @@ typedef struct screen {
     uint16_t*       buffer;        /* active write target: VGA_MEMORY or saved_buffer */
     uint16_t*       saved_buffer;  /* always points to this screen's private RAM copy */
     uint16_t        cursor_pos;
+	bool			cursor_visible;
     int             screen_id;
     ring_buffer*    history;       /* scroll-back history for this screen */
 } screen;
@@ -177,12 +179,14 @@ void	handle_keyboard_keypress(kfs *k);
 bool	handle_screen_shortcut(kfs *k, uint8_t scancode);
 
 /* keymap.c */
-char	keymap_translate(screen *scr,uint8_t scancode, bool shift_pressed);
+char	keymap_translate(uint8_t scancode, bool shift_pressed);
 
 
 /* handle_cursor.c */
 void	initialize_cursor_pos(screen *scr);
 void	update_cursor_pos(screen *scr);
+void	hide_cursor(screen *scr);
+void	show_cursor(screen *scr);
 
 /* handle_scroll.c */
 /*
@@ -205,11 +209,8 @@ void	switch_screen(kfs *k, int screen_index);
 /*
 parsing_command.c
 create a micro posix shell where it could execute "clear" command
-
-
-Global Descriptor Table (GDT) and Interrupt Descriptor Table (IDT) setup
-	(ONLY THINK OF WHERE IT SHOULD BE CALLED, NOT THE IMPLEMENTATION)
 */
+// void 	parse_command(kfs *k, const char* command);
 
 // Helper functions
 /* vga.c */
