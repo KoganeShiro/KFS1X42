@@ -133,7 +133,7 @@ Since we want to create a terminal like screen, so we can use left and right arr
 
 ##### Handle different screens
 Then the switch between screens shortcut (alt + 1, alt + 2, alt + 3). So the logic will be to have a sort of screen arrays containing a buffer of the content of the VGA memory (frame buffer). By changing the screen, we will render the content of the buffer of the screen we want to switch to on the VGA memory, and update the pointer of the active screen. We also added a little message to indicate on which screen we are when we switch.
-For that, we used a circular buffer to store the content of the VGA memory for each screen, and we also save the cursor position for each screen in order to restore it when we switch back to that screen.
+For that, we used a static array of saved buffers to store the content of the VGA memory for each screen, and we also save the cursor position for each screen in order to restore it when we switch back to that screen.
 
 ##### Implement scroll support
 And finally, we implemented the scroll support.

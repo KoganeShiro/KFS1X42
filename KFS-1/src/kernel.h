@@ -53,7 +53,7 @@ typedef struct va_list {
 # define VGA_HEIGHT  25
 # define VGA_MEMORY  0xB8000
 # define VGA_BUFFER_SIZE (VGA_WIDTH * VGA_HEIGHT)
-# define HISTORY_MAX_LINES (VGA_HEIGHT * 30)
+# define HISTORY_MAX_LINES 42
 # define MAX_SCREENS 9
 
 /* printk log level */
