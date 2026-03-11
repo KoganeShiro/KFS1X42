@@ -78,12 +78,11 @@ void kernel_main(void)
 	screen *scr = kfs_active_screen(&k);
 
 	print_header(scr);
-	// printk(scr, LOG_LEVEL_DEBUG"ptr: %p ||| hex of a: %x", &k, 'A');
-	// printk(scr, LOG_LEVEL_DEBUG"print char: %c\n", 'A');
-	// printk(scr, LOG_LEVEL_DEBUG"print int: %i\n", 'A');
-	// printk(scr, LOG_LEVEL_INFO "Welcome to KFS-1, a simple %d-bit kernel written in C!\n", 32);
-	// printk(scr, LOG_LEVEL_WARNING "This is a warning message.\n");
-	// printk(scr, LOG_LEVEL_ERROR "This is an error message.\n");
+	printk(scr, LOG_LEVEL_DEBUG"ptr: %p ||| hex of a: %x\n", &k, 'A');
+	printk(scr, LOG_LEVEL_DEBUG"print char: %c ||| print int: %i\n", 'A', 'A');
+	printk(scr, LOG_LEVEL_INFO "Welcome to KFS-1, a simple %d-bit kernel written in C!\n", 32);
+	printk(scr, LOG_LEVEL_WARNING "This is a warning message.\n");
+	printk(scr, LOG_LEVEL_ERROR "This is an error message.\n");
 
 	handle_keyboard_keypress(&k);
 }

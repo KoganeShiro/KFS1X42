@@ -103,10 +103,6 @@ enum vga_color
 };
 
 
-/* Forward declarations */
-typedef struct screen screen;
-typedef struct ring_buffer ring_buffer;
-
 /* Scroll-back ring buffer (stores full VGA entries: char + color) */
 typedef struct ring_buffer {
     uint16_t  buffer[VGA_WIDTH * HISTORY_MAX_LINES];
