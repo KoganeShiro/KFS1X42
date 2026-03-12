@@ -55,8 +55,13 @@ docker-iso: docker-build
 	docker run --rm -v $(PWD):/workspace $(DOCKER_IMAGE) make iso
 
 # Build + run QEMU on the host
+# -enable-kvm : use hardware virtualisation (KVM) so the host CPU natively
+#               executes guest code.  The "pause" spin-wait in the keyboard
+#               loop triggers Pause-Loop Exiting (PLE), which lets the host
+#               deschedule the vCPU — dropping host CPU usage from ~100 % to ~0 %.
+# -cpu host   : expose the real host CPU model to the guest (requires KVM).
 run: docker-iso
-	qemu-system-i386 -cdrom $(ISO)
+	qemu-system-i386 -enable-kvm -cpu host -cdrom $(ISO)
 
 # Remove Docker image and containers
 docker-clean:
