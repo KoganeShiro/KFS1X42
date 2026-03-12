@@ -87,7 +87,6 @@ void command_parser(screen *scr)
         if (scr->shell_mode)
             shell_prompt(scr);
     }
-
     /* Reset command buffer — just null-terminate and reset index */
     scr->cmdline_buffer[0] = '\0';
     scr->cmdline_index = 0;

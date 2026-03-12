@@ -1,9 +1,18 @@
 #include "kernel.h"
 
+
+/*
+** kfs_shutdown() - Power off the machine.
+**   They are no universal hardware instruction for power off but emulators do provide a way to shut down.
+**   QEMU >= 2.0 ACPI shutdown: outw(0x604, 0x2000); 
+https://wiki.osdev.org/Shutdown
+*/
 void kfs_shutdown(screen *scr)
 {
+    (void)scr;
     printk(scr, LOG_LEVEL_INFO "Shutting down the system...\n");
-    // Here you would add the actual shutdown code, such as sending ACPI commands
-    // or halting the CPU. For now, we'll just print a message.
+
+    /* QEMU >= 2.0 ACPI shutdown */
+    outw(0x604, 0x2000);
 }
 

@@ -57,18 +57,20 @@ static void scroll_redraw(screen *scr)
 
 static bool scroll_up(screen *scr, ring_buffer *h)
 {
-	scr->cursor_visible = false;
-/* Nothing in history to scroll to */
+	/* Nothing in history to scroll to */
 	if (h->total_lines == 0)
-	   return (true);
+		return (true);
 	/* Already scrolled back as far as history allows */
 	if (h->scroll_offset >= h->total_lines)
 	   return (true);
+
 	/* First time leaving live view: snapshot the current VGA */
-	if (h->scroll_offset == 0)
-	   memcpy(h->live_snapshot, scr->buffer,
-	         VGA_BUFFER_SIZE * sizeof(uint16_t));
+	if (h->scroll_offset == 0) {
+		memcpy(h->live_snapshot, scr->buffer,
+			  VGA_BUFFER_SIZE * sizeof(uint16_t));
+	}
 	h->scroll_offset++;
+	scr->cursor_visible = false;
 	scroll_redraw(scr);
 	update_cursor_pos(scr);
 	hide_cursor(scr);

@@ -34,8 +34,7 @@ void update_cursor_pos(screen *scr)
 {
     scr->cursor_pos = scr->row * VGA_WIDTH + scr->column;
 
-    /* If the cell at cursor is empty, repaint it with the current color
-       so the hardware cursor (full block) reflects the active color. */
+    /* update cursor color */
     if ((scr->buffer[scr->cursor_pos] & GET_LOWER_8B_MASK) == '\0')
         scr->buffer[scr->cursor_pos] = vga_entry('\0', scr->color);
 
