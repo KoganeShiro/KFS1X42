@@ -34,6 +34,11 @@ void update_cursor_pos(screen *scr)
 {
     scr->cursor_pos = scr->row * VGA_WIDTH + scr->column;
 
+    /* If the cell at cursor is empty, repaint it with the current color
+       so the hardware cursor (full block) reflects the active color. */
+    if ((scr->buffer[scr->cursor_pos] & GET_LOWER_8B_MASK) == '\0')
+        scr->buffer[scr->cursor_pos] = vga_entry('\0', scr->color);
+
     // Tell VGA: "I want to write to VGA_CURSOR_LOW_REGISTER"
     outb(VGA_CTRL_PORT, VGA_CURSOR_LOW_REGISTER);        
     // Write low byte through port, INTO register VGA_CURSOR_LOW_REGISTER

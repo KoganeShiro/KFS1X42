@@ -60,12 +60,18 @@ static void shift_left_from_cursor(screen *scr)
     scr->buffer[line_end] = vga_entry('\0', scr->color);
 }
 
-// Handle backspace: move cursor back and print space
+// Handle backspace: move cursor back, shift VGA line, and update cmdline buffer
 static void handle_backspace(screen *scr)
 {
     if (scr->column > 0) {
         scr->column--;
         shift_left_from_cursor(scr);
+
+        /* Keep cmdline_buffer in sync with what's on screen */
+        if (scr->cmdline_index > 0) {
+            scr->cmdline_index--;
+            scr->cmdline_buffer[scr->cmdline_index] = '\0';
+        }
     }
     return;
 }
@@ -135,19 +141,22 @@ void handle_keyboard_keypress(kfs *k)
     while (1) {
         uint8_t scancode = get_scancode();
         
-        // Only process if we got a valid scancode (not 0)
-        if (scancode != 0) {
-            if (handle_screen_shortcut(k, scancode) == true) {
-                continue; // If it was a screen shortcut, skip normal processing
-            }
-            if (handle_scroll_key(k, scancode) == true) {
-                continue; // If it was a scroll key, skip normal processing
-            }
-            screen *scr = kfs_active_screen(k);
-            if (scr->cursor_visible == true) {
-                process_scancode(scr, scancode);
-                update_cursor_pos(scr);
-            }
+        if (scancode == 0) {
+            /* No key pending — hint to the CPU that this is a spin-wait loop. */
+            asm volatile("pause");
+            continue;
+        }
+
+        if (handle_screen_shortcut(k, scancode) == true) {
+            continue; // If it was a screen shortcut, skip normal processing
+        }
+        if (handle_scroll_key(k, scancode) == true) {
+            continue; // If it was a scroll key, skip normal processing
+        }
+        screen *scr = kfs_active_screen(k);
+        if (scr->cursor_visible == true) {
+            process_scancode(scr, scancode);
+            update_cursor_pos(scr);
         }
     }
 }

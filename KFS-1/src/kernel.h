@@ -106,7 +106,8 @@ typedef struct va_list {
 					 "  LIGHT_RED:   	Change text color to light red\n" \
 					 "  LIGHT_MAGENTA: 	Change text color to light magenta\n" \
 					 "  LIGHT_BROWN: 	Change text color to light brown\n" \
-					 "  WHITE:    		Change text color to white\n" 
+					 "  WHITE:    		Change text color to white\n" \
+					 "  RESET:    		Reset text color to white\n"
 
 
 /* Hardware VGA color palette */
@@ -249,7 +250,7 @@ uint8_t		vga_entry_color(enum vga_color fg, enum vga_color bg);
 void		kfs_set_color(screen *scr, uint8_t color);
 
 /* string.c */
-size_t strcmp(const char* aptr, const char* bptr);
+int strcmp(const char* aptr, const char* bptr);
 size_t 		strlen(const char* str) ;
 void* 		memmove(void* dstptr, const void* srcptr, size_t size);
 int 		memcmp(const void* aptr, const void* bptr, size_t size);
