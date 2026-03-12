@@ -1,5 +1,13 @@
 #include "kernel.h"
 
+size_t strcmp(const char* aptr, const char* bptr)
+{
+	size_t i = 0;
+	while (aptr[i] && bptr[i] && aptr[i] == bptr[i]) {
+		i++;
+	}
+	return ((unsigned char) aptr[i] - (unsigned char) bptr[i]);
+}
 
 size_t strlen(const char* str) 
 {

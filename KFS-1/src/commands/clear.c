@@ -11,3 +11,8 @@
 //             index += 2;
 //     }
 // }
+
+void clear_terminal(screen *scr)
+{
+    printk(scr, LOG_LEVEL_INFO "Clearing the terminal...\n");
+}

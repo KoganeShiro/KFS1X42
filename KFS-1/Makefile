@@ -34,7 +34,12 @@ C_SRC   = kernel.c \
 		  printk/printk.c \
 		  printk/convert.c \
 		  lib/string.c \
-		  lib/print_header.c
+		  lib/print_header.c \
+		  commands/clear.c \
+		  commands/reboot.c \
+		  commands/shutdown.c \
+		  commands/command_parser.c \
+		  commands/handle_commands.c 
 
 # == Objects ==================================================
 OBJ     = $(OBJDIR)/boot.o $(addprefix $(OBJDIR)/, $(C_SRC:.c=.o))
@@ -64,8 +69,10 @@ docker-clean:
 help:
 	@echo "Available targets:"
 	@echo "  run            - Build + run QEMU on the host"
+	@echo "  re		        - Clean and rebuild everything"
+	@echo "  clean		    - Clean everything except Docker image"
+	@echo "  fclean		    - Clean everything even remove Docker image"
 	@echo "  docker-build   - Build the Docker image (only needed once)"
-	@echo "  docker-iso     - Build the ISO inside the container"
 	@echo "  docker-clean   - Remove Docker image"
 	@echo "  help           - Show this help message"
 

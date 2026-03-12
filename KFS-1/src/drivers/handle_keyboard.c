@@ -61,7 +61,6 @@ static void shift_left_from_cursor(screen *scr)
 }
 
 // Handle backspace: move cursor back and print space
-//TODO: move the remain char to the left
 static void handle_backspace(screen *scr)
 {
     if (scr->column > 0) {
@@ -106,6 +105,7 @@ static void process_scancode(screen *scr, uint8_t scancode)
     shift_pressed = is_shift_pressed(scancode, shift_pressed);
     if (scancode == KEY_ENTER) {
         kfs_putchar(scr, '\n');
+        command_parser(scr);
         return;
     }
     if (scancode == KEY_BACKSPACE) {
@@ -115,9 +115,13 @@ static void process_scancode(screen *scr, uint8_t scancode)
     if (handle_arrow_keys(scr, scancode) == 1) {
         return; 
     }
+    
+    if (scancode & KEY_RELEASE_MASK)
+        return;
 
     char c = keymap_translate(scancode, shift_pressed);
     if (c) {
+        add_char_to_cmdline_buffer(scr, c);
         kfs_putchar(scr, c);
     }
 }

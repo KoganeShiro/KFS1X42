@@ -3,14 +3,6 @@
 static uint16_t		saved_buffers[MAX_SCREENS][VGA_BUFFER_SIZE];
 static ring_buffer	history_pool[MAX_SCREENS];
 
-/*
-** Packs two 4-bit colors (foreground + background) into one byte.
-*/
-static inline uint8_t vga_entry_color(enum vga_color fg, enum vga_color bg) 
-{
-	return fg | bg << 4;
-}
-
 
 
 /*
@@ -38,6 +30,9 @@ static void init_screen(screen *scr, int id)
 	scr->cursor_visible = true;
 	scr->screen_id = id + 1;
 	scr->history = &history_pool[id];
+	scr->cmdline_index = 0;
+	scr->cmdline_buffer[0] = '\0';
+	scr->shell_mode = false;
 
 	/* Clear this screen's saved buffer */
 	for (size_t i = 0; i < VGA_BUFFER_SIZE; i++)
@@ -73,15 +68,14 @@ void kfs_initialize(kfs *k)
 
 void kernel_main(void) 
 {
-	kfs k;
+	static kfs k;
 
 	kfs_initialize(&k);
 	screen *scr = kfs_active_screen(&k);
 
 	print_header(scr);
-	printk(scr, LOG_LEVEL_DEBUG"ptr: %p ||| hex of a: %x\n", &k, 'A');
-	printk(scr, LOG_LEVEL_DEBUG"print char: %c ||| print int: %i\n", 'A', 'A');
-	printk(scr, LOG_LEVEL_INFO "Welcome to KFS-1, a simple %d-bit kernel written in C!\n", 32);
+	printk(scr, LOG_LEVEL_INFO "Welcome to KFS-1, a simple %d-bit kernel written in C!\nType 'shell' to enter the command line interface\n", 32);
+	printk(scr, LOG_LEVEL_DEBUG"ptr: %p ||| hex of A: %x ||| print char: %c ||| print int: %i\n", &k, 'A', 'A', 'A');
 	printk(scr, LOG_LEVEL_WARNING "This is a warning message.\n");
 	printk(scr, LOG_LEVEL_ERROR "This is an error message.\n");
 

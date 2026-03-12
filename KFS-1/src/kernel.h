@@ -82,6 +82,33 @@ typedef struct va_list {
 #define KEY_RIGHT       0x4D
 
 
+#define HELP_MESSAGE "Available commands:\n" \
+					 "  clear:       	Clear the terminal screen\n" \
+					 "  header:      	Print the kernel header\n" \
+					 "  help:        	Show this help message\n" \
+					 "  shutdown:    	Shutdown the system\n" \
+					 "  reboot:      	Reboot the system\n" \
+					 "  exit:        	Exit shell mode\n" \
+					 "  COLOR:       	Will show available colors\n"
+
+#define COLOR_MESSAGE "Available colors:\n" \
+					 "  BLUE:        	Change text color to blue\n" \
+					 "  GREEN:       	Change text color to green\n" \
+					 "  CYAN:        	Change text color to cyan\n" \
+					 "  RED:         	Change text color to red\n" \
+					 "  MAGENTA:     	Change text color to magenta\n" \
+					 "  BROWN:       	Change text color to brown\n" \
+					 "  LIGHT_GREY:  	Change text color to light grey\n" \
+					 "  DARK_GREY:   	Change text color to dark grey\n" \
+					 "  LIGHT_BLUE:  	Change text color to light blue\n" \
+					 "  LIGHT_GREEN: 	Change text color to light green\n" \
+					 "  LIGHT_CYAN:  	Change text color to light cyan\n" \
+					 "  LIGHT_RED:   	Change text color to light red\n" \
+					 "  LIGHT_MAGENTA: 	Change text color to light magenta\n" \
+					 "  LIGHT_BROWN: 	Change text color to light brown\n" \
+					 "  WHITE:    		Change text color to white\n" 
+
+
 /* Hardware VGA color palette */
 enum vga_color
 {
@@ -130,7 +157,10 @@ typedef struct screen {
     size_t          row;
     size_t          column;
     uint8_t         color;
-    uint16_t*       buffer;        /* active write target: VGA_MEMORY or saved_buffer */
+	char			cmdline_buffer[VGA_BUFFER_SIZE]; /* buffer to store current command line input */
+    size_t 		   	cmdline_index;  /* current index in the cmdline_buffer */
+	bool			shell_mode;      /* flag to indicate if we are in shell mode */
+	uint16_t*       buffer;        /* active write target: VGA_MEMORY or saved_buffer */
     uint16_t*       saved_buffer;  /* always points to this screen's private RAM copy */
     uint16_t        cursor_pos;
 	bool			cursor_visible;
@@ -189,15 +219,6 @@ void	hide_cursor(screen *scr);
 void	show_cursor(screen *scr);
 
 /* handle_scroll.c */
-/*
-**  terminal_scroll() 
-** Called when the cursor moves past the last row.
-** 1. Copy every row UP by one:
-**      for each row y from 1 to VGA_HEIGHT-1:
-**        buffer[(y-1) * WIDTH + x] = buffer[y * WIDTH + x]
-** 2. Clear the last row:
-**      fill row (VGA_HEIGHT-1) with spaces + current color
-*/
 bool	handle_scroll_key(kfs *k, uint8_t scancode);
 void 	terminal_overflow_down(screen *scr) ;	
 
@@ -206,18 +227,29 @@ void 	terminal_overflow_down(screen *scr) ;
 void	switch_screen(kfs *k, int screen_index);
 
 
-/*
-parsing_command.c
-create a micro posix shell where it could execute "clear" command
-*/
-// void 	parse_command(kfs *k, const char* command);
+
+/* handle_commands.c */
+void add_char_to_cmdline_buffer(screen *scr, char c);
+void shell_prompt(screen *scr);
+
+/* parsing_command.c */
+void command_parser(screen *scr);
+
+
+void kfs_shutdown(screen *scr);
+void kfs_reboot(screen *scr);
+void clear_terminal(screen *scr);
+
+
 
 // Helper functions
 /* vga.c */
 uint16_t	vga_entry(unsigned char uc, uint8_t color) ;
+uint8_t		vga_entry_color(enum vga_color fg, enum vga_color bg);
 void		kfs_set_color(screen *scr, uint8_t color);
 
 /* string.c */
+size_t strcmp(const char* aptr, const char* bptr);
 size_t 		strlen(const char* str) ;
 void* 		memmove(void* dstptr, const void* srcptr, size_t size);
 int 		memcmp(const void* aptr, const void* bptr, size_t size);

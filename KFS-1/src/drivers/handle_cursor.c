@@ -55,6 +55,7 @@ void hide_cursor(screen *scr)
 
 void show_cursor(screen *scr)
 {
+    (void)scr;
     // Set cursor shape: scanlines 0-15 = full block cursor
     uint8_t cursor_start = 0;   // Top scanline (0-15)
     uint8_t cursor_end = 15;    // Bottom scanline (0-15)
