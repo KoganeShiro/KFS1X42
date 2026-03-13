@@ -13,7 +13,7 @@ This roadmap is designed to build your understanding progressively. Each level b
 ### Concepts:
 1. **[[Transistor]]** — The fundamental building block (electronic switch)
 2. **[[Logic Gates]]** — AND, OR, NOT, XOR — how transistors combine to make decisions
-3. **Binary Arithmetic** — How numbers and data are represented (0s and 1s)
+3. **Binary Arithmetic** — How numbers and data are represented (using only 0s and 1s)
 4. **Clock Cycles** — The heartbeat of a computer (synchronization)
 
 ### Key Questions to Answer:
@@ -21,31 +21,48 @@ This roadmap is designed to build your understanding progressively. Each level b
 <details>
 <summary>How does a transistor act as a switch?</summary>
 
-Voltage on the gate → current flows (1). No voltage → no current (0). Billions of MOSFETs switching on/off = computation.
+Voltage on the gate → current flows (1). No voltage → no current (0). Billions of switching on/off = computation.
+- [ Transistors Explained - How transistors work](https://youtu.be/J4oO7PT_nzQ?si=2Nx1Xf1lAIon_ECW)
+- [ HOW TRANSISTORS RUN CODE? ](https://youtu.be/HjneAhCy2N4?si=VWlJtFxck5anitL2)
 </details>
 
 <details>
 <summary>How do logic gates combine to perform addition?</summary>
 
 XOR gate = sum, AND gate = carry. Chain them into a **full adder** (handles carry-in). Cascade N full adders = N-bit addition.
+- [ Exploring How Computers Work ](https://www.youtube.com/watch?v=QZwneRb-zqA&list=PLD0P-oVoDCNbYKzfUj8rlZrWhfKmYjtqQ)
+- [ Boolean Logic & Logic Gates: Crash Course Computer Science #3 ](https://youtu.be/gI-qXk7XojA?si=mKaqq72Xsfum1RNZ)
+
+If you want to go deeper on how it work
+- [ Introduction to Logic Gates - NOT, AND, OR, NAND, NOR, XOR, XNOR ](https://youtu.be/JQBRzsPhw2w?si=r6vPmMsltOHTEgiQ)
+- [ Logic Gates, Truth Tables, Boolean Algebra AND, OR, NOT, NAND & NOR ](https://youtu.be/JQBRzsPhw2w?si=8d964UTYigdFWDyJ)
 </details>
 
 <details>
 <summary>What is a clock signal and why is it necessary?</summary>
 
 Periodic square wave from a crystal oscillator. Synchronizes all CPU operations — one step (fetch/decode/execute) per rising edge. 3 GHz = 3 billion ticks/sec.
+- [ How the Clock Tells the CPU to "Move Forward" ](https://youtu.be/PVNAPWUxZ0g?si=lF3DM-VXa8aMlP3h)
+- [ How do Digital and Analog Clocks Work? ](https://youtu.be/oEC5fIw0bL0?si=zfm5gDmXUAoqOI5U)
+- [ The Fetch-Execute Cycle: What's Your Computer Actually Doing? ](https://youtu.be/Z5JC9Ve1sfI?si=wojWDD9a4QKhWyVM)
 </details>
 
 <details>
 <summary>What is the difference between combinational and sequential logic?</summary>
 
 **Combinational** = output depends only on inputs (gates). **Sequential** = has state/memory (flip-flops, registers). ALU is combinational; registers are sequential.
+- [ Comparison between Combinational and Sequential Circuits ](https://youtu.be/SzV4l0_1MCQ?si=U5RxA-dGFKRsDqKF)
+- [ Ep 026: Introduction to Combinational Logic ](https://youtu.be/lTmAlB1T6Yo?si=aNtQylEyxBjrfC9s)
+- [Sequential Logic Circuits - Electronics tutorial (article)](https://www.electronics-tutorials.ws/sequential/seq_1.html)
 </details>
 
 <details>
 <summary>How are negative numbers represented in binary?</summary>
 
-**Two's complement**: invert all bits + add 1. MSB = sign bit. Addition works the same for signed/unsigned — no special hardware needed.
+**Two's complement**: invert all bits + add 1. MSB (most significant bit) = sign bit. Addition works the same for signed/unsigned — no special hardware needed.
+
+- [Bit_numbering](https://en-wikipedia-org.translate.goog/wiki/Bit_numbering?_x_tr_sl=en&_x_tr_tl=fr&_x_tr_hl=fr&_x_tr_pto=rq)
+
 </details>
 
 ---
@@ -69,37 +86,71 @@ Periodic square wave from a crystal oscillator. Synchronizes all CPU operations 
 <details>
 <summary>What are the main x86 registers and their purposes?</summary>
 
-**EAX** (accumulator/return values), **EBX** (base/GP), **ECX** (counter/loops), **EDX** (data/I/O), **ESI/EDI** (source/dest index), **ESP** (stack top), **EBP** (stack frame base), **EIP** (next instruction — not directly writable), **EFLAGS** (status: CF, ZF, SF, OF, IF). Segment registers: CS, DS, SS, ES, FS, GS.
+- **EAX** (accumulator/return values)
+- **EBX** (base/GP)
+- **ECX** (counter/loops)
+- **EDX** (data/I/O)
+- **ESI/EDI** (source/dest index), **ESP** (stack top)
+- **EBP** (stack frame base)
+- **EIP** (next instruction — not directly writable)
+- **EFLAGS** (status: CF, ZF, SF, OF, IF). Segment registers: CS, DS, SS, ES, FS, GS.
+- https://wiki.osdev.org/CPU_Registers_x86
+- https://medium.com/@tushrsa/x86-64-registers-naming-explained-1cd958628090
 </details>
 
 <details>
 <summary>How does the CPU know what instruction to execute next?</summary>
 
 **EIP** holds the next instruction address. Auto-incremented after fetch. Changed explicitly by `JMP`, `CALL`, `RET`, and interrupts. Not writable via `MOV`.
+- https://math.hws.edu/javanotes/c1/s1.html
+- [ How do CPUs know what instruction to compute next ](https://youtu.be/BahvBKcHkuQ?si=Wcf7M700CHNRfBlZ)
 </details>
 
 <details>
 <summary>What is the difference between real mode and protected mode?</summary>
 
 Real mode: 16-bit, 1 MB, no protection. Protected mode: 32-bit, 4 GB, ring-based privilege (0-3), GDT-based segments. Switch: set PE bit in CR0 + far jump.
+In the boot context: the CPU starts in **real mode** (16-bit, 1 MB address space, no protection). The bootloader must:
+1. Set up a **GDT** with at least code and data segments
+2. Set the **PE bit** (bit 0) in the **CR0** register: `mov cr0, eax` (with bit 0 set)
+3. Perform a **far jump** to a 32-bit code segment to flush the prefetch queue
+
+After this, the CPU operates in 32-bit protected mode with full 4 GB addressing.
+- https://stackoverflow.com/questions/19619425/what-is-the-true-difference-between-a-real-mode-program-and-a-protected-mode-pro
+- [ Making an OS (x86) Chapter 6 - Entering Protected mode, GDT ](https://www.youtube.com/watch?v=Wh5nPn2U_1w&list=PLm3B56ql_akNcvH8vvJRYOc7TbYhRs19M&index=6)
+- [ Protected mode: how your OS can protect itself ](https://youtu.be/EBdzWFyKZ0U?si=cxKKsacyRdQ2im0L)
+
 </details>
 
 <details>
 <summary>What is the role of ESP and EBP?</summary>
 
-**ESP** = top of stack (moves on push/pop/call/ret). **EBP** = stable anchor for the current stack frame. Args at `[ebp+8]`, locals at `[ebp-4]`. Set by function prologue: `push ebp; mov ebp, esp`.
+- **ESP** = top of stack (moves on push/pop/call/ret)
+- **EBP** = stable anchor for the current stack frame. Args at `[ebp+8]`, locals at `[ebp-4]`. Set by function prologue: `push ebp; mov ebp, esp`.
+
+- [ The Stack and ESP in Assembly Language - What happens when you call a procedure? ](https://youtu.be/RU5vUIl1vRs?si=e_7vWL-TMrQefeS3)
+- [ 08 - The Stack ](https://www.youtube.com/watch?v=gWTuOENv6AA&list=PLHJns8WZXCdvaD7-xR7e5FJNW_6H9w-wC&index=8)
+- [ wtf is “the stack” ? ](https://youtu.be/CRTR5ljBjPM?si=M6Fmd9CqTBQe9kXh)
+
 </details>
 
 <details>
 <summary>What happens during a CPU pipeline stall?</summary>
 
 Data dependency between in-flight instructions → pipeline must wait (bubble). Mitigated by forwarding and branch prediction. Mispredicted branch = full pipeline flush.
+
+- [ CPU Pipeline - Computerphile ](https://www.youtube.com/watch?v=BVNx3wtJ9vs&list=PLzH6n4zXuckpwdGMHgRH5N9xNHzVGCxwf&index=4)
+- [ Ep 085: Introduction to the CPU Pipeline ](https://www.youtube.com/watch?v=E5qacBU1XjQ&list=PLxfrSxK7P38X7XfG4X8Y9cdOURvC7ObMF&index=85)
+- [Pipeline stall - Wikipedia](https://en.wikipedia.org/wiki/Pipeline_stall)
 </details>
 
 <details>
 <summary>How does the CPU cache hierarchy work?</summary>
 
 L1 (~4 cycles, 32-64 KB per core) → L2 (~10 cycles) → L3 (~30-40 cycles, shared) → RAM (~100-200 cycles). Data loaded in 64-byte cache lines. Exploits spatial & temporal locality.
+
+- [ How CPU Memory & Caches Work - Computerphile ](https://youtu.be/SAk-6gVkio0?si=EZTwWucPfRuIETYK)
+- [ How Cache Works Inside a CPU ](https://www.youtube.com/watch?v=zF4VMombo7U&list=PL38NNHQLqJqYnNrTenxBvGJSPCkV9EOWk)
 </details>
 
 ---
@@ -152,6 +203,8 @@ lea eax, [ebx + 4*ecx]   ; stores the ADDRESS (ebx + 4*ecx) into eax
 LEA is often used as a fast way to do arithmetic: `lea eax, [eax + eax*2]` computes `eax * 3` in one instruction without touching memory.
 </details>
 
+- [ you can learn assembly in 10 minutes (try it RIGHT NOW) ](https://youtu.be/6S5KRJv-7RU?si=MNt9f-fbWPKANKBq)
+- [ 4. Assembly Language & Computer Architecture ](https://www.youtube.com/watch?v=L1ung0wil9Y&list=PLUl4u3cNGP63VIBQVWguXxZZi0566y7Wf&index=4)
 <details>
 <summary>How do interrupts work and why are they important?</summary>
 
@@ -168,6 +221,11 @@ When an interrupt fires, the CPU:
 4. Handler runs, then executes **IRET** to restore EFLAGS/CS/EIP and resume
 
 Without interrupts, the CPU would have to **poll** every device in a loop — wasting cycles and missing events.
+
+- [ CPU Interrupts - Computerphile ](https://www.youtube.com/watch?v=tGMSARJk7cA&list=PLzH6n4zXuckpwdGMHgRH5N9xNHzVGCxwf&index=11)
+- [ Ep 088: Introduction to Interrupts ](https://www.youtube.com/watch?v=dDA3PUr16As&list=PLxfrSxK7P38X7XfG4X8Y9cdOURvC7ObMF&index=88)
+- [ How Interrupts Work in Modern Computers ](https://youtu.be/G7bqvpAw7HE?si=oK7M1_Gj7C0H-JRF)
+- [ Microcontroller Interrupts | Embedded System Project Series #17 ](https://www.youtube.com/watch?v=S-daLDfkoyY&list=PLS_iNJJVTtiRV0DZRDcTHnvAuDrKGPN40&index=17)
 </details>
 
 <details>
@@ -197,6 +255,9 @@ Stack during my_func:
 ```
 
 This is the **cdecl** calling convention: caller pushes args right-to-left, caller cleans up the stack after return.
+
+- [ How Assembly Functions Work - The Stack Explained ](https://youtu.be/u_-oQx_4jvo?si=3dU77nHfOmYcdSY7)
+- [ Buffer Overflow 101: Ep 1 - x86 Memory Fundamentals ](https://www.youtube.com/watch?v=_D8eLCmlrS8&list=PLdVIvW2RPTRxNdJeBZRcdt1JQJlmQlQMU)
 </details>
 
 <details>
@@ -248,6 +309,10 @@ KFS-1 uses GAS syntax in `boot.s` (because GCC's inline assembler uses AT&T by d
 8. **Mode switch** — GRUB switches CPU from real mode → protected mode
 9. **Kernel entry** — GRUB jumps to the kernel's entry point (`_start` in `boot.s`)
 10. **`kernel_main()`** — your C code takes over
+
+- [ Computer Boot Process animation ](https://youtu.be/PSnGuvylWBI?si=dK_LVxzqrHObQvxW)
+- [ How Does Linux Boot Process Work? ](https://youtu.be/XpFsMB6FoOs?si=zIT8yZqEha09Eije)
+- [ BIOS, CMOS, UEFI - What's the difference? ](https://youtu.be/LGz0Io_dh_I?si=EaZdrF4LxyyWzzT7)
 </details>
 
 <details>
@@ -265,6 +330,9 @@ Multiboot is a standard that defines how a bootloader should load a kernel. It e
 - Put a pointer to a `multiboot_info` struct in **EBX** and the magic `0x2BADB002` in **EAX**
 
 This lets any multiboot-compliant bootloader (GRUB, GRUB2, Limine with multiboot support) load your kernel without changes.
+
+- https://wiki.osdev.org/Multiboot
+- 
 </details>
 
 <details>
@@ -281,20 +349,12 @@ This lets any multiboot-compliant bootloader (GRUB, GRUB2, Limine with multiboot
 7. It jumps to the kernel entry point — your `_start` label in `boot.s`
 
 Your linker script (`linker.ld`) controls the load addresses — typically starting at `0x100000` (1 MB), above the legacy BIOS area.
+
+- https://wiki.osdev.org/Bootloader
+- [ Bootloaders Explained ](https://youtu.be/ShKh-18fK54?si=bjjnKdrrG5-iIQXB)
 </details>
 
 <details>
-<summary>What is the difference between real mode and protected mode?</summary>
-
-(Same question as Level 1 — see above for detailed table.)
-
-In the boot context: the CPU starts in **real mode** (16-bit, 1 MB address space, no protection). The bootloader must:
-1. Set up a **GDT** with at least code and data segments
-2. Set the **PE bit** (bit 0) in the **CR0** register: `mov cr0, eax` (with bit 0 set)
-3. Perform a **far jump** to a 32-bit code segment to flush the prefetch queue
-
-After this, the CPU operates in 32-bit protected mode with full 4 GB addressing.
-</details>
 
 <details>
 <summary>What is the MBR and why is it limited to 512 bytes?</summary>
@@ -311,6 +371,8 @@ The **Master Boot Record** is the very first sector of a disk (LBA 0). The BIOS 
 ```
 
 The BIOS only reads **one sector** — that's a hardware/firmware convention from the original IBM PC (1981). The 446 bytes of code must be enough to locate and load a larger stage-2 bootloader. This is why bootloaders like GRUB have multiple stages.
+
+- https://en.wikipedia.org/wiki/Master_boot_record
 </details>
 
 ---
@@ -349,6 +411,10 @@ SECTIONS {
 ```
 
 The `. = 0x100000` is critical: GRUB loads the kernel exactly where the linker script and ELF headers say. If the addresses are wrong, the kernel will crash immediately.
+
+- [ Compiling, assembling, and linking ](https://youtu.be/N2y6csonII4?si=s9t_rX9jhfqEDN6y)
+- [ How do computers read code? ](https://youtu.be/QXjU9qTsYCc?si=3q7Q8dzFva__gJU2)
+- [ why do header files even exist? ](https://youtu.be/tOQZlD-0Scc?si=gsUnBgVT3n-gEI4X)
 </details>
 
 <details>
@@ -367,6 +433,10 @@ A minimal GDT for a flat-memory kernel:
 Both code and data segments span the entire 4 GB (base=0, limit=0xFFFFF with 4 KB granularity). This is a **flat memory model** — effectively disabling segmentation while satisfying the CPU's requirement to have a GDT.
 
 Setup: fill the GDT entries in memory, then load it with `lgdt [gdt_descriptor]` where `gdt_descriptor` contains the size and base address of the table. Then reload segment registers (CS via far jump, DS/SS/ES via MOV).
+
+- [ Building an OS - 8 - Interrupts, IDT, GDT ](https://www.youtube.com/watch?v=5LbXClJhxcs&list=PLFjM7v6KGMpiH2G-kT781ByCNC_0pKpPN&index=12)
+- [ Making an OS (x86) Chapter 6 - Entering Protected mode, GDT ](https://www.youtube.com/watch?v=Wh5nPn2U_1w&list=PLm3B56ql_akNcvH8vvJRYOc7TbYhRs19M&index=6)
+- [ x86 Operating Systems - Implementing a GDT ](https://www.youtube.com/watch?v=jwulDRMQ53I&list=PL2EF13wm-hWAglI8rRbdsCPq_wRpYvQQy&index=3)
 </details>
 
 <details>
@@ -388,6 +458,10 @@ To handle them:
 3. Load the IDT with `lidt [idt_descriptor]`
 
 A **fault** re-executes the faulting instruction after the handler returns (useful for page faults — map the page, then retry). An **abort** is unrecoverable (double fault = an exception occurred while handling an exception).
+
+- https://www.delorie.com/djgpp/doc/dpmi/ch4.5.html
+- https://os.phil-opp.com/cpu-exceptions/
+- https://wiki.osdev.org/Exceptions
 </details>
 
 <details>
@@ -402,6 +476,9 @@ A **fault** re-executes the faulting instruction after the handler returns (usef
 | **Examples** | Linux, KFS-1 | MINIX, QNX, seL4 |
 
 KFS-1 is monolithic — everything (VGA, keyboard, commands) runs in a single kernel binary with no user-space separation.
+
+- https://www.geeksforgeeks.org/operating-systems/difference-between-microkernel-and-monolithic-kernel/
+- [ Structures of Operating System ](https://youtu.be/XXPBl20J22w?si=hIhrt-c3HbC0tZ3v)
 </details>
 
 <details>
@@ -422,6 +499,11 @@ KFS-1 is monolithic — everything (VGA, keyboard, commands) runs in a single ke
 ```
 
 GRUB parses the ELF program headers to know where to load each segment in memory. The entry point field tells GRUB where to jump after loading. Without understanding ELF, you can't debug linker issues or understand why your kernel loads at a specific address.
+
+- https://wiki.osdev.org/ELF
+- https://medium.com/@abissazaki133/understanding-the-elf-format-a-comprehensive-guide-bab04997001e
+- [ How Linux Kernel Runs Executables ](https://youtu.be/ZlZDWeVL2LI?si=hSzW8XMqHKtqfqx7)
+- [ In-depth: ELF - The Extensible & Linkable Format ](https://youtu.be/nC1U1LJQL8o?si=d0hx3g6MeLgkbieM)
 </details>
 
 ---
@@ -458,6 +540,10 @@ vga[index] = 'A' | (0x0F << 8);     // 0x0F = white FG, black BG
 ```
 
 That's it — no syscall, no driver API. You're writing directly to hardware-mapped memory. The video card continuously reads this buffer and renders it to the screen.
+
+- https://os.phil-opp.com/vga-text-mode/
+- https://wiki.osdev.org/Printing_To_Screen
+- [ [030] VGA Text Mode! (Part 2) - Building a GPU From Scratch ](https://www.youtube.com/watch?v=PFazC5LR2eI&list=PLilenfQGj6CEG6iZ4TQJ10PI7pCWsy1AO&index=30)
 </details>
 
 <details>
@@ -477,6 +563,10 @@ uint8_t get_scancode(void) {
 ```
 
 The scancode is a hardware number (e.g., `0x1E` = 'A' key pressed, `0x9E` = 'A' key released). You translate it to ASCII using a lookup table (`keymap.c`). Key release scancodes have bit 7 set (scancode | 0x80).
+
+- [ How do Computer Keyboards Work? 🤔⌨⌨🛠 ](https://youtu.be/h-NM1xSSzHQ?si=jDw3_abbBwKEmXGr)
+- [ How CPUs Interact with So Many Different Devices ](https://youtu.be/tadUeiNe5-g?si=1STwJyNeYbuFN4X5)
+- [ How Your Code Really Controls Hardware ](https://youtu.be/sp3mMwo3PO0?si=uIjh-r-21UxDqe14)
 </details>
 
 <details>
@@ -491,6 +581,8 @@ The scancode is a hardware number (e.g., `0x1E` = 'A' key pressed, `0x9E` = 'A' 
 | **KFS-1 uses** | ✅ Polling (`get_scancode()` in a loop) | ❌ Not implemented (no IDT/PIC setup) |
 
 Polling is simpler but wastes CPU cycles. Interrupts are efficient but require setting up the IDT, programming the PIC, and writing ISR (Interrupt Service Routine) handlers in assembly.
+
+- [ #14 Interrupts Explained for Microcontrollers ](https://www.youtube.com/watch?v=cKBqA7IDNpA&list=PL6PplMTH29SEJhWqxhxkDKYPtw0C4mnNY&index=15)
 </details>
 
 <details>
@@ -520,6 +612,9 @@ Setup steps:
    ```c
    outb(0x20, 0x20);  // EOI to master PIC
    ```
+
+- [ PIC MCU TUTORIALS #14 - Interrupts & How do they work? (Absolute Beginner) ](https://www.youtube.com/watch?v=hqf9PtsTKmA&list=PLRF1jJIZn8UrmuGBVvzN-c6S45CjyrFmt&index=14)
+- [ Building an OS - 10 - Hardware interrupts, PIC ](https://www.youtube.com/watch?v=FD48Lx7Rnx0&list=PLFjM7v6KGMpiH2G-kT781ByCNC_0pKpPN&index=14)
 </details>
 
 <details>
@@ -530,6 +625,8 @@ Setup steps:
 **Port-mapped I/O (PMIO):** Devices have a separate address space accessed via special `IN` and `OUT` instructions. Example: keyboard controller at ports `0x60`/`0x64`, VGA cursor registers at `0x3D4`/`0x3D5`.
 
 x86 supports both. KFS-1 uses MMIO for VGA text and PMIO for everything else (keyboard, cursor, shutdown, reboot).
+
+- [ Memory Mapped IO vs Port Mapped IO (Animation) ](https://youtu.be/bY6NQb10AaI?si=8KM1gVDFfc8DApJk)
 </details>
 
 ---
@@ -572,6 +669,9 @@ On x86 (32-bit, no PAE), translation is a two-level lookup:
 - Total: 1024 × 1024 × 4 KB = 4 GB addressable
 
 To enable paging: fill page tables, load CR3, set the PG bit (bit 31) in CR0.
+
+- [ Page Tables and MMU: How Virtual Memory Actually Works Behind the Scenes (Animation) ](https://www.youtube.com/watch?v=B6tJxvYBNrU&list=PL38NNHQLqJqZoDp4CrAueD1aBin7OebEL&index=2)
+- [ Segmented, Paged and Virtual Memory ](https://youtu.be/p9yZNLeOj4s?si=rsj0KV9-Trwf5kTo)
 </details>
 
 <details>
@@ -587,6 +687,8 @@ On x86 (Linux-style):
 5. Result returned in EAX, `IRET` switches back to ring 3
 
 The kernel must validate all pointers passed from user space — a malicious program could pass kernel-space addresses to trick the kernel into corrupting itself.
+
+- [ Linux System Calls Explained ](https://youtu.be/JdVn3RMLU_Q?si=6tsq-gbBz_vaqSHt)
 </details>
 
 <details>
@@ -615,6 +717,9 @@ mov cr3, [next_task->cr3]  ; switch address space
 pop ecx, ebx, eax, ...    ; restore registers from new stack
 ret                        ; pops EIP → resumes next process
 ```
+
+- [ How Hardware Assist Software When Multitasking ](https://youtu.be/1HHeyUVz43k?si=YnIESl80BTUUCsFQ)
+- [ OS Context Switching - Computerphile ](https://youtu.be/DKmBRl8j3Ak?si=tur7zMDlvNLMxXYO)
 </details>
 
 <details>
@@ -635,6 +740,9 @@ while (1) {
 ```
 
 In KFS-1, the shell is simpler — it runs **inside** the kernel (no user space, no fork/exec). Commands are dispatched via a static lookup table in `command_parser.c`. Typing `shell` activates prompt mode, and commands like `clear`, `help`, `reboot` are matched by string comparison and call kernel functions directly.
+
+- [ Terminal vs. Bash vs. Command line vs. Prompt ](https://youtu.be/hMSByvFHOro?si=bf1xOzWv8gXq-_Xw)
+- [ what is a tty? (beginner - intermediate) anthony explains #022 ](https://youtu.be/SYwbEcNrcjI?si=-O29xDakNKPnbbbg)
 </details>
 
 <details>
@@ -650,6 +758,10 @@ In KFS-1, the shell is simpler — it runs **inside** the kernel (no user space,
 - **Overcommit** — allocate more virtual memory than physical RAM (swap to disk)
 - **Shared memory** — map the same physical page into multiple address spaces
 - **Memory-mapped files** — map file contents directly into the address space
+
+- [ What's Virtual Memory? - Computerphile ](https://youtu.be/5lFnKYCZT5o?si=mKhn7LcOMUg1JRAI)
+- [ What is Virtual Memory? MMU, Page Tables, and more! ](https://youtu.be/4e18yybPo1E?si=9GwTi1IWGv6qLEJU)
+- [ Your Computer is Lying To You (Virtual Memory) ](https://youtu.be/Aw0YAUdQp1c?si=OtYO8CO5-ApPJjmZ)
 </details>
 
 <details>
@@ -672,6 +784,8 @@ Useful QEMU flags for kernel development:
 | `-no-reboot` | Halt instead of rebooting on triple fault |
 | `-serial stdio` | Redirect serial port to terminal (for debug output) |
 | `-m 128M` | Set RAM size |
+
+- [ QEMU/KVM for absolute beginners ](https://youtu.be/BgZHbCDFODk?si=E2K6eCQ4xAowCg7l)
 </details>
 
 ---
