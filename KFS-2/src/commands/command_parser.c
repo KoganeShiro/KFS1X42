@@ -9,6 +9,7 @@ typedef struct command {
 /* Thin wrappers so every handler has the same signature */
 static void cmd_clear(screen *scr)    { clear_terminal(scr); }
 static void cmd_header(screen *scr)   { print_header(scr); }
+static void cmd_42_header(screen *scr)   { print_42_header(scr); }
 static void cmd_help(screen *scr)     { printk(scr, LOG_LEVEL_INFO HELP_MESSAGE); }
 static void cmd_shutdown(screen *scr) { kfs_shutdown(scr); }
 static void cmd_reboot(screen *scr)   { kfs_reboot(scr); }
@@ -28,13 +29,20 @@ static void cmd_light_red(screen *scr)    { scr->color = VGA_COLOR_LIGHT_RED; }
 static void cmd_light_magenta(screen *scr)  { scr->color = VGA_COLOR_LIGHT_MAGENTA; }
 static void cmd_light_brown(screen *scr)  { scr->color = VGA_COLOR_LIGHT_BROWN; }
 static void cmd_white(screen *scr)    { scr->color = VGA_COLOR_WHITE; }
+static void cmd_halt(screen *scr)     { kfs_halt(scr); }
+static void cmd_print_gdt(screen *scr) { print_gdt(scr); }
+static void cmd_print_stack(screen *scr) { print_stack(scr); }
 
 static const command commands[] = {
     { "clear",    cmd_clear    },
     { "header",   cmd_header   },
+    { "42header",   cmd_42_header   },
     { "help",     cmd_help     },
     { "shutdown", cmd_shutdown },
     { "reboot",   cmd_reboot   },
+    { "print gdt",     cmd_print_gdt },
+    { "print stack",   cmd_print_stack },
+    { "halt",      cmd_halt },
     { "COLOR",    cmd_color    },
     { "RED",      cmd_red      },
     { "BLUE",     cmd_blue     },

@@ -84,8 +84,12 @@ typedef struct va_list {
 
 #define HELP_MESSAGE "Available commands:\n" \
 					 "  clear:       	Clear the terminal screen\n" \
+					 "  print gdt:    	Print the GDT table\n" \
+					 "  print stack:  	Print the stack\n" \
 					 "  header:      	Print the kernel header\n" \
+					 "  42header:    	Print the 42 header\n" \
 					 "  help:        	Show this help message\n" \
+					 "  halt:        	Halt the system\n" \
 					 "  shutdown:    	Shutdown the system\n" \
 					 "  reboot:      	Reboot the system\n" \
 					 "  exit:        	Exit shell mode\n" \
@@ -240,7 +244,9 @@ void command_parser(screen *scr);
 void kfs_shutdown(screen *scr);
 void kfs_reboot(screen *scr);
 void clear_terminal(screen *scr);
-
+void kfs_halt(screen *scr);
+void print_gdt(screen *scr);
+void print_stack(screen *scr);
 
 
 // Helper functions
@@ -258,7 +264,8 @@ void* 		memset(void* bufptr, int value, size_t size);
 void* 		memcpy(void* restrict dstptr, const void* restrict srcptr, size_t size);
 
 /* print_header.c */
-void 		print_header(screen *scr) ;
+void 		print_42_header(screen *scr);
+void 		print_header(screen *scr);
 
 
 

@@ -10,7 +10,7 @@ https://wiki.osdev.org/Reboot
 */
 void kfs_reboot(screen *scr)
 {
-    (void)scr;
+    printk(scr, LOG_LEVEL_WARNING "Rebooting the machine...\n");
     /* Wait for the keyboard controller input buffer to be empty */
     uint8_t status;
     do {

@@ -19,6 +19,7 @@
 11. [Memory Management](#11-memory-management)
 12. [Virtual Memory & Paging](#12-virtual-memory--paging)
 13. [QEMU & KVM](#13-qemu--kvm)
+14. [GDT (Global Descriptor Table)]()
 
 ---
 

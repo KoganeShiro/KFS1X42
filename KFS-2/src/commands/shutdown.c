@@ -9,7 +9,6 @@ https://wiki.osdev.org/Shutdown
 */
 void kfs_shutdown(screen *scr)
 {
-    (void)scr;
     printk(scr, LOG_LEVEL_INFO "Shutting down the system...\n");
 
     /* QEMU >= 2.0 ACPI shutdown */

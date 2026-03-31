@@ -39,7 +39,9 @@ C_SRC   = kernel.c \
 		  commands/reboot.c \
 		  commands/shutdown.c \
 		  commands/command_parser.c \
-		  commands/handle_commands.c 
+		  commands/handle_commands.c \
+		  commands/print_gdt.c \
+		  commands/halt.c
 
 # == Objects ==================================================
 OBJ     = $(OBJDIR)/boot.o $(addprefix $(OBJDIR)/, $(C_SRC:.c=.o))

@@ -434,6 +434,7 @@ Both code and data segments span the entire 4 GB (base=0, limit=0xFFFFF with 4 K
 
 Setup: fill the GDT entries in memory, then load it with `lgdt [gdt_descriptor]` where `gdt_descriptor` contains the size and base address of the table. Then reload segment registers (CS via far jump, DS/SS/ES via MOV).
 
+- https://wiki.osdev.org/Global_Descriptor_Table
 - [ Building an OS - 8 - Interrupts, IDT, GDT ](https://www.youtube.com/watch?v=5LbXClJhxcs&list=PLFjM7v6KGMpiH2G-kT781ByCNC_0pKpPN&index=12)
 - [ Making an OS (x86) Chapter 6 - Entering Protected mode, GDT ](https://www.youtube.com/watch?v=Wh5nPn2U_1w&list=PLm3B56ql_akNcvH8vvJRYOc7TbYhRs19M&index=6)
 - [ x86 Operating Systems - Implementing a GDT ](https://www.youtube.com/watch?v=jwulDRMQ53I&list=PL2EF13wm-hWAglI8rRbdsCPq_wRpYvQQy&index=3)

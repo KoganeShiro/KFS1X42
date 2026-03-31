@@ -72,7 +72,7 @@ void kernel_main(void)
 	kfs_initialize(&k);
 	screen *scr = kfs_active_screen(&k);
 
-	print_header(scr);
+	print_42_header(scr);
 	printk(scr, LOG_LEVEL_INFO "Type 'shell' to enter the command line interface\n");
 
 	handle_keyboard_keypress(&k);

@@ -63,6 +63,9 @@ static void shift_left_from_cursor(screen *scr)
 // Handle backspace: move cursor back, shift VGA line, and update cmdline buffer
 static void handle_backspace(screen *scr)
 {
+    if (scr->column <= 3 && scr->shell_mode == true) {
+        return;
+    }
     if (scr->column > 0) {
         scr->column--;
         shift_left_from_cursor(scr);
@@ -85,6 +88,9 @@ static int handle_arrow_keys(screen *scr, uint8_t scancode)
         // command history like readline ?
             return (1);
         case KEY_LEFT:
+            if (scr->column <= 3 && scr->shell_mode == true) {
+                return (1);
+            }
             if (scr->column > 0 && has_char_at(scr, scr->cursor_pos - 1)) {
                 scr->column--;
             }
