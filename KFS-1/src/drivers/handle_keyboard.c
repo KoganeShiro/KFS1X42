@@ -82,7 +82,6 @@ static int handle_arrow_keys(screen *scr, uint8_t scancode)
     switch (scancode) {
         case KEY_UP:
         case KEY_DOWN:
-        // command history like readline ?
             return (1);
         case KEY_LEFT:
             if (scr->column > 0 && has_char_at(scr, scr->cursor_pos - 1)) {

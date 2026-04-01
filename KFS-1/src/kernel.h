@@ -258,7 +258,8 @@ void* 		memset(void* bufptr, int value, size_t size);
 void* 		memcpy(void* restrict dstptr, const void* restrict srcptr, size_t size);
 
 /* print_header.c */
-void 		print_header(screen *scr) ;
+void 		print_42_header(screen *scr);
+void 		print_header(screen *scr);
 
 
 

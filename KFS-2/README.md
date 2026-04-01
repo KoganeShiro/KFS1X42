@@ -46,30 +46,37 @@ From my understanding, it seems like like this way of segmentation is not really
 
 What are asked in the subject is to create a GDT with 6 entries: Kernel code, Kernel data, Kernel stack, User code, User data and User stack. Each entry will have its own base address, limit and access rights. The GDT must be set at address 0x00000800 and declared to the BIOS.
 
-The "modern" way of implementing a GDT would be to follow this:
-| Segment     | Base | Limit | Privilege | Type       | Why                 |
-| ----------- | ---- | ----- | --------- | ---------- | ------------------- |
-| Null        | —    | —     | —         | —          | Required by CPU     |
-| Kernel Code | 0    | 4GB   | 0         | Executable | Kernel instructions |
-| Kernel Data | 0    | 4GB   | 0         | Read/Write | Kernel data + stack |
-| User Code   | 0    | 4GB   | 3         | Executable | User programs       |
-| User Data   | 0    | 4GB   | 3         | Read/Write | User data + stack   |
+The GDT entries can be represented in a table like this:
 
-But what the subject is asking is more something like this:
-Index | Segment        | Base | Limit | Privilege | Type        | Reason
-------+----------------+------+-------+-----------+-------------+------------------------------
-0     | Null           | 0    | 0     | —         | —           | Required by CPU (must exist)
-1     | Kernel Code    | 0    | 4GB   | 0         | Executable  | Kernel instructions
-2     | Kernel Data    | 0    | 4GB   | 0         | Read/Write  | Kernel data
-3     | Kernel Stack   | 0    | 4GB   | 0         | Read/Write  | (Same as data, for SS)
-4     | User Code      | 0    | 4GB   | 3         | Executable  | User programs
-5     | User Data      | 0    | 4GB   | 3         | Read/Write  | User data
-6     | User Stack     | 0    | 4GB   | 3         | Read/Write  | (Same as data, for SS)
+Index | Segment        | Base    | Limit  | Priv | Type        | Reason
+------+----------------+---------+--------+------+-------------+---------------------------
+0     | Null           | 0x00000 | 0x0000 | —    | —           | Required by CPU (must exist)
+1     | Kernel Code    | 0x10000 | 0xFFFF | 0    | Exec        | Kernel instructions
+2     | Kernel Data    | 0x10000 | 0xFFFF | 0    | Read/Write  | Kernel data
+3     | Kernel Stack   | 0x18000 | 0xFFFF | 0    | Read/Write  | Kernel stack (Same as data, for SS)
+4     | User Code      | 0x20000 | 0xFFFF | 3    | Exec        | User programs
+5     | User Data      | 0x20000 | 0xFFFF | 3    | Read/Write  | User data
+6     | User Stack     | 0x28000 | 0xFFFF | 3    | Read/Write  | User stack (Same as data, for SS)
+
+| Index | Selector | Segment         | Base | Limit   | Access | Granularity |
+|-------|----------|-----------------|------|---------|--------|-------------|
+| 0     | 0x00     | Null            | 0    | 0       | 0x00   | 0x00        |
+| 1     | 0x08     | Kernel Code     | 0    | 0xFFFFF | 0x9A   | 0xCF        |
+| 2     | 0x10     | Kernel Data     | 0    | 0xFFFFF | 0x92   | 0xCF        |
+| 3     | 0x18     | Kernel Stack    | 0    | 0xFFFFF | 0x92   | 0xCF        |
+| 4     | 0x20     | User Code       | 0    | 0xFFFFF | 0xFA   | 0xCF        |
+| 5     | 0x28     | User Data       | 0    | 0xFFFFF | 0xF2   | 0xCF        |
+| 6     | 0x30     | User Stack      | 0    | 0xFFFFF | 0xF2   | 0xCF        |
+
+The base address is the starting address of the segment in memory, the limit is the size of the segment, the privilege level (Priv) indicates the level of access allowed for that segment (0 for kernel, 3 for user), and the type indicates whether the segment is executable or read/write.
+
+![alt text](image.png)
+
 
 
 For the bonuses, since we already start by implemented some basics commands, we can add some more by implementing the commands asked in the bonus part:
 - print-kernel-stack-thing
-- halt
+- halt is done but it will only halt the CPU (meaning the kernel will just freeze and... that's it)
 
 ## Ressources
 - [os dev wiki](https://wiki.osdev.org/Expanded_Main_Page)

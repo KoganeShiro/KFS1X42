@@ -58,9 +58,8 @@ void kfs_initialize(kfs *k)
 
 	k->screens[0].buffer = (uint16_t*)VGA_MEMORY;
 
-	/* Clear VGA memory (what's actually on the monitor) */
-	for (size_t i = 0; i < VGA_BUFFER_SIZE; i++)
-		k->screens[0].buffer[i] = vga_entry('\0', k->screens[0].color);
+	// /* Clear VGA memory (what's actually on the monitor) */
+	clear_terminal(&k->screens[0]);
 
 	initialize_cursor_pos(&k->screens[0]);
 }
@@ -73,11 +72,8 @@ void kernel_main(void)
 	kfs_initialize(&k);
 	screen *scr = kfs_active_screen(&k);
 
-	print_header(scr);
-	printk(scr, LOG_LEVEL_INFO "Welcome to KFS-1, a simple %d-bit kernel written in C!\nType 'shell' to enter the command line interface\n", 32);
-	printk(scr, LOG_LEVEL_DEBUG"ptr: %p ||| hex of A: %x ||| print char: %c ||| print int: %i\n", &k, 'A', 'A', 'A');
-	printk(scr, LOG_LEVEL_WARNING "This is a warning message.\n");
-	printk(scr, LOG_LEVEL_ERROR "This is an error message.\n");
+	print_42_header(scr);
+	printk(scr, LOG_LEVEL_INFO "Type 'shell' to enter the command line interface\n");
 
 	handle_keyboard_keypress(&k);
 }

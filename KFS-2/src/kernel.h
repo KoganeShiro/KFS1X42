@@ -178,8 +178,51 @@ typedef struct kfs {
 	int current_screen;
 	int total_screens;
 	screen screens[MAX_SCREENS];
+	gdt gdt;
 } kfs;
 
+
+//GDT
+#define NB_OF_GDT_ENTRY 7
+#define GDT_ADDR    0x00000800
+
+typedef struct gdt_access {
+	uint8_t accessed        : 1; // Bit 0: CPU sets this to 1 when segment is accessed
+	uint8_t read_write      : 1; // Bit 1: Readable for Code, Writable for Data
+	uint8_t conforming      : 1; // Bit 2: Conforming bit
+	uint8_t executable      : 1; // Bit 3: 1 for Code, 0 for Data
+	uint8_t descriptor_type : 1; // Bit 4: 1 for Code/Data, 0 for System
+	uint8_t privilege_level : 2; // Bits 5-6: 0 for Kernel, 3 for User
+	uint8_t present         : 1; // Bit 7: Must be 1 for valid segments
+} __attribute__((packed)) gdt_access;
+
+typedef struct gdt_granularity {
+	uint8_t limit_high      : 4; // Bits 0-3: Upper 4 bits of segment limit
+	uint8_t available       : 1; // Bit 4: Available for system use
+	uint8_t long_mode       : 1; // Bit 5: 1 for 64-bit code segment
+	uint8_t size_flag       : 1; // Bit 6: 1 for 32-bit protected mode
+	uint8_t granularity     : 1; // Bit 7: 1 for 4KB page granularity
+} __attribute__((packed)) gdt_granularity;
+
+typedef struct descriptor {
+	uint16_t limit_low;      // Lower 16 bits of the segment limit
+	uint16_t base_low;       // Lower 16 bits of the base address
+	uint8_t  base_middle;    // Next 8 bits of the base address
+	gdt_access access;       // Access flags using bitfields
+	gdt_granularity granularity; // Granularity and limit using bitfields
+	uint8_t  base_high;      // Last 8 bits of the base address
+} __attribute__((packed)) descriptor;
+
+
+typedef struct gdt_ptr {
+	uint16_t limit; // Size of the GDT (total size of all entries - 1)
+	uint32_t base; // GDT_ADDR
+} __attribute__((packed)) gdt_ptr;
+
+typedef struct gdt {
+	descriptor entries[NB_OF_GDT_ENTRY];
+	gdt_ptr    ptr;
+} gdt;
 
 
 
@@ -231,6 +274,9 @@ void 	terminal_overflow_down(screen *scr) ;
 /* handle_screen.c */
 void	switch_screen(kfs *k, int screen_index);
 
+/* GDT */
+// void init_gdt(kfs *k);
+// void fill_gdt(kfs *k);
 
 
 /* handle_commands.c */

@@ -69,6 +69,7 @@ void kernel_main(void)
 {
 	static kfs k;
 
+	init_gdt(&k);
 	kfs_initialize(&k);
 	screen *scr = kfs_active_screen(&k);
 
