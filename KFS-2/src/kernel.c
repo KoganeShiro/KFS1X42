@@ -19,7 +19,7 @@ screen* kfs_active_screen(kfs *k)
 **   - buffer starts pointing to saved_buffer (inactive by default)
 **   - Screen 0 will have buffer overridden to VGA_MEMORY after init
 */
-static void init_screen(screen *scr, int id)
+static void _init_screen(screen *scr, int id)
 {
 	scr->row = 0;
 	scr->column = 0;
@@ -54,7 +54,7 @@ void kfs_initialize(kfs *k)
 	k->total_screens = MAX_SCREENS;
 
 	for (int i = 0; i < MAX_SCREENS; i++)
-		init_screen(&k->screens[i], i);
+		_init_screen(&k->screens[i], i);
 
 	k->screens[0].buffer = (uint16_t*)VGA_MEMORY;
 

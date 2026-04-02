@@ -1,7 +1,7 @@
 #include "kernel.h"
 
 // Check if there's a character at the given position (not '\0')
-static int has_char_at(screen *scr, int cursor_pos)
+static int _has_char_at(screen *scr, int cursor_pos)
 {
     uint16_t entry = scr->buffer[cursor_pos];
     char c = (char)(entry & GET_LOWER_8B_MASK);  // Extract character from VGA entry
@@ -15,7 +15,7 @@ static int has_char_at(screen *scr, int cursor_pos)
 **     1 = Buffer full (data ready to read from port 0x60)
 **     0 = Buffer empty (no new data)
 */
-static inline int keyboard_data_ready(void)
+static inline int _keyboard_data_ready(void)
 {
     return (inb(KEYBOARD_STATUS_PORT) & 0x01);
 }
@@ -24,9 +24,9 @@ static inline int keyboard_data_ready(void)
 ** get_scancode() - Read scancode only if new data is ready
 ** Returns scancode if available, 0 if no new data
 */
-static inline uint8_t get_scancode(void)
+static inline uint8_t _get_scancode(void)
 {
-    if (keyboard_data_ready()) {
+    if (_keyboard_data_ready()) {
         return (inb(KEYBOARD_PORT));
     }
     return (0);
@@ -91,12 +91,12 @@ static int handle_arrow_keys(screen *scr, uint8_t scancode)
             if (scr->column <= 3 && scr->shell_mode == true) {
                 return (1);
             }
-            if (scr->column > 0 && has_char_at(scr, scr->cursor_pos - 1)) {
+            if (scr->column > 0 && _has_char_at(scr, scr->cursor_pos - 1)) {
                 scr->column--;
             }
             return (1);
         case KEY_RIGHT:
-            if (scr->column < VGA_WIDTH - 1 && has_char_at(scr, scr->cursor_pos)) {
+            if (scr->column < VGA_WIDTH - 1 && _has_char_at(scr, scr->cursor_pos)) {
                 scr->column++;
             }
             return (1);
@@ -110,7 +110,7 @@ static int handle_arrow_keys(screen *scr, uint8_t scancode)
 Handle special keys (Enter, Backspace, Arrow keys).
 Call map_scancode() and print it.
 */
-static void process_scancode(screen *scr, uint8_t scancode)
+static void _process_scancode(screen *scr, uint8_t scancode)
 {
     static int shift_pressed = 0;
 
@@ -145,7 +145,7 @@ call get_scancode() in a loop, and call process_scancode() for each scancode rea
 void handle_keyboard_keypress(kfs *k)
 {
     while (1) {
-        uint8_t scancode = get_scancode();
+        uint8_t scancode = _get_scancode();
         
         if (scancode == 0) {
             /* No key pending — hint to the CPU that this is a spin-wait loop. */
@@ -161,7 +161,7 @@ void handle_keyboard_keypress(kfs *k)
             }
             screen *scr = kfs_active_screen(k);
             if (scr->cursor_visible == true) {
-                process_scancode(scr, scancode);
+                _process_scancode(scr, scancode);
                 update_cursor_pos(scr);
             }
         }

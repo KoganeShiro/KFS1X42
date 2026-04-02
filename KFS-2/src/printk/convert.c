@@ -1,6 +1,6 @@
 #include "kernel.h"
 
-static char* 	zero_case(char* buffer)
+static char* 	_zero_case(char* buffer)
 {
 	int i = 0;
 
@@ -9,7 +9,7 @@ static char* 	zero_case(char* buffer)
 	return (buffer);
 }
 
-char* reverse_str(char* buffer)
+char* _reverse_str(char* buffer)
 {
 	int i = 0;
 	while (buffer[i] != '\0') {
@@ -28,7 +28,7 @@ char* 	itoa(int value, char* buffer)
 	int i = 0;
 
 	if (value == 0) {
-		return (zero_case(buffer));
+		return (_zero_case(buffer));
 	}
 	if (value < 0) {
 		value = -value;
@@ -40,7 +40,7 @@ char* 	itoa(int value, char* buffer)
 		value /= 10;
 	}
 	buffer[i] = '\0';
-	return (reverse_str(buffer));
+	return (_reverse_str(buffer));
 }
 
 /*
@@ -52,7 +52,7 @@ char* itoh(unsigned int value, char* buffer, char *hexa)
 	int i = 0;
 	
 	if (value == 0) {
-		return zero_case(buffer);
+		return (_zero_case(buffer));
 	}
 	// Extract hex digits (in reverse)
 	while (value > 0) {
@@ -61,5 +61,5 @@ char* itoh(unsigned int value, char* buffer, char *hexa)
 	}
 	buffer[i] = '\0';
 	// Reverse the string
-	return (reverse_str(buffer));
+	return (_reverse_str(buffer));
 }

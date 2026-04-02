@@ -237,7 +237,6 @@ int		printk(screen *scr, const char *data, ...);
 /* convert.c */
 char* 	itoa(int value, char* buffer);
 char* 	itoh(unsigned int value, char* buffer, char *hexa);
-char* 	reverse_str(char* buffer);
 
 
 /* vga_write.c */
@@ -275,7 +274,7 @@ void 	terminal_overflow_down(screen *scr) ;
 void	switch_screen(kfs *k, int screen_index);
 
 /* GDT */
-// void init_gdt(kfs *k);
+void init_gdt(kfs *k);
 // void fill_gdt(kfs *k);
 
 
