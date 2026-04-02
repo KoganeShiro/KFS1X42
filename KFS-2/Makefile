@@ -15,7 +15,7 @@ LDFLAGS = -ffreestanding -O2 -nostdlib -nodefaultlibs -lgcc
 # == Paths =====================================================
 ISODIR  = isodir
 KERNEL  = $(ISODIR)/boot/kernel.bin
-ISO     = kfs1.iso
+ISO     = kfs2.iso
 OBJDIR  = obj
 SRCDIR  = src
 
