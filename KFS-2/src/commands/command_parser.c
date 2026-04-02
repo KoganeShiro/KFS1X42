@@ -98,4 +98,3 @@ void command_parser(gdt *gdt, screen *scr)
     scr->cmdline_buffer[0] = '\0';
     scr->cmdline_index = 0;
 }
-
