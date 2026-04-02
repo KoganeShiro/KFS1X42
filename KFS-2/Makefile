@@ -21,6 +21,7 @@ SRCDIR  = src
 
 # == Sources ==================================================
 ASM_SRC = boot/boot.s
+
 C_SRC   = kernel.c \
 		  drivers/vga.c \
 		  drivers/vga_write.c \
@@ -44,8 +45,10 @@ C_SRC   = kernel.c \
 		  commands/halt.c \
 		  gdt/gdt.c 
 
+EXTRA_ASM_SRC = gdt/load_gdt.s
+
 # == Objects ==================================================
-OBJ     = $(OBJDIR)/boot.o $(addprefix $(OBJDIR)/, $(C_SRC:.c=.o))
+OBJ     = $(OBJDIR)/boot.o $(addprefix $(OBJDIR)/, $(EXTRA_ASM_SRC:.s=.o)) $(addprefix $(OBJDIR)/, $(C_SRC:.c=.o))
 
 # ══════════════════════════════════════════════════════════════
 # HOST targets — run these from your machine
@@ -96,6 +99,11 @@ $(OBJDIR)/%.o: src/%.c
 $(OBJDIR)/%.o: boot/%.s
 	mkdir -p $(OBJDIR)
 	$(AS) $< -o $@
+
+$(OBJDIR)/%.o: src/%.s
+	mkdir -p $(dir $@)
+	$(AS) $< -o $@
+
 
 $(KERNEL): $(OBJ)
 	mkdir -p $(ISODIR)/boot

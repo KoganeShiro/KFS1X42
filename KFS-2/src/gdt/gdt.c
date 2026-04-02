@@ -58,19 +58,13 @@ static void _setup_user_segments(descriptor *gdt_table, gdt_granularity std_gran
 
 void init_gdt(kfs *k)
 {
-	// We want to place the GDT exactly at 0x800 
-	descriptor *gdt_table = (descriptor *)GDT_ADDR;
+	k->gdt = (gdt *)GDT_ADDR;
 
 	// 0: Null Descriptor (Required by CPU)
 	gdt_access null_access = {0};
 	gdt_granularity null_gran = {0};
-	_fill_gdt(&gdt_table[0], 0, 0, null_access, null_gran);
+	_fill_gdt(&k->gdt->entries[0], 0, 0, null_access, null_gran);
 
-	/* 
-	 * Standard Granularity for all our segments:
-	 * 32-bit protected mode (size_flag=1)
-	 * 4KB page sizing (granularity=1) -> our limit of 0xFFFFF is multiplied by 4KB to reach 4GB
-	*/
 	gdt_granularity std_gran = {
 		.limit_high  = 0, // overwritten in fill_gdt
 		.available   = 0,
@@ -78,11 +72,12 @@ void init_gdt(kfs *k)
 		.size_flag   = 1, // 1 for 32-bit 
 		.granularity = 1  // Multiply limit by 4KB
 	};
-	_setup_kernel_segments(gdt_table, std_gran);
-	_setup_user_segments(gdt_table, std_gran);
+	_setup_kernel_segments(k->gdt->entries, std_gran);
+	_setup_user_segments(k->gdt->entries, std_gran);
 
-	// Setup the pointer struct for lgdt instruction
 	k->gdt->ptr.limit = (sizeof(descriptor) * NB_OF_GDT_ENTRY) - 1;
-	k->gdt->ptr.base = GDT_ADDR;
+	k->gdt->ptr.base = (uint32_t)&k->gdt->entries;
+
+	load_gdt(&(k->gdt->ptr));
 }
 

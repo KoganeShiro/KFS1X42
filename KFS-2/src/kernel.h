@@ -84,8 +84,8 @@ typedef struct va_list {
 
 #define HELP_MESSAGE "Available commands:\n" \
 					 "  clear:       	Clear the terminal screen\n" \
-					 "  gdt:    		Print the GDT table\n" \
-					 "  stack:  		Print the stack\n" \
+					 "  gdt:    			Print the GDT table\n" \
+					 "  stack:  			Print the stack\n" \
 					 "  header:      	Print the kernel header\n" \
 					 "  42header:    	Print the 42 header\n" \
 					 "  help:        	Show this help message\n" \
@@ -273,7 +273,7 @@ void	switch_screen(kfs *k, int screen_index);
 
 /* GDT */
 void init_gdt(kfs *k);
-// void fill_gdt(kfs *k);
+extern void load_gdt(gdt_ptr *gdt_pointer);
 
 
 /* handle_commands.c */

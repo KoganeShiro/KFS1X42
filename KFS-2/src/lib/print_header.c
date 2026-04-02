@@ -20,19 +20,17 @@ void print_42_header(screen *scr)
     printk(scr, "       | || ||___ \\                              \n");
     kfs_set_color(scr, vga_entry_color(rainbow[color_index++], VGA_COLOR_BLACK));
     printk(scr, "       | || |_ __) |                             \n");
-    printk(scr, "       |__   _/ __/  _                           \n");
+    printk(scr, "       |__   _/ __/                            \n");
     kfs_set_color(scr, vga_entry_color(rainbow[color_index++], VGA_COLOR_BLACK));
-    printk(scr, "       __ |_||_____|| | ___ ___  _ __ ___   ___  \n");
-    printk(scr, "       \\ \\ /\\ / / _ \\ |/ __/ _ \\| '_ ` _ \\ / _ \\ \n");
+    printk(scr, "       __ |_||_____| __ \n");
     kfs_set_color(scr, vga_entry_color(rainbow[color_index++], VGA_COLOR_BLACK));
-    printk(scr, "        \\ V  V /  __/ | (_| (_) | | | | | |  __/ \n");
-    printk(scr, "        _\\_/\\_/ \\___|_|\\___\\___/|_| |_| |_|\\___| \n");
+    printk(scr, "        _     __          ____   \n");
+    printk(scr, "       | | __/ _|___     |___ \\   \n");
     kfs_set_color(scr, vga_entry_color(rainbow[color_index++], VGA_COLOR_BLACK));
-    printk(scr, "       | |_ ___   | | __/ _|___      / |         \n");
-    printk(scr, "       | __/ _ \\  | |/ / |_/ __|_____| |         \n");
+    printk(scr, "       | |/ / |_/ __|_____ __) |         \n");
+    printk(scr, "       |   <|  _\\__ \\_____/ __/       \n");
     kfs_set_color(scr, vga_entry_color(rainbow[color_index++], VGA_COLOR_BLACK));
-    printk(scr, "       | || (_) | |   <|  _\\__ \\_____| |         \n");
-    printk(scr, "        \\__\\___/  |_|\\_\\_| |___/     |_|         \n\n");
+    printk(scr, "       |_|\\_\\_| |___/    |_____|\n\n");
     kfs_set_color(scr, default_color);
     printk(scr, "********************************************************************************");
     printk(scr, "You are on the %i screen\n\n", scr->screen_id);
@@ -40,6 +38,15 @@ void print_42_header(screen *scr)
     return;
 }
 
+/*
+ 
+ _          _     __          ____  
+| |_ ___   | | __/ _|___     |___ \ 
+| __/ _ \  | |/ / |_/ __|_____ __) |
+| || (_) | |   <|  _\__ \_____/ __/ 
+ \__\___/  |_|\_\_| |___/    |_____|
+                                                                     
+*/
 
 void print_header(screen *scr) 
 {

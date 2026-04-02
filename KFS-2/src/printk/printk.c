@@ -16,12 +16,20 @@ static int _kfs_putint(screen *scr, int value)
 	return (_kfs_putstr(scr, buffer, strlen(buffer)));
 }
 
-static int _kfs_puthex(screen *scr, unsigned int value, char *hexa) 
+static int _kfs_puthex(screen *scr, unsigned int value, char *hexa, int width, char pad_char) 
 {
 	char buffer[32];
+	int printed = 0;
 
 	itoh(value, buffer, hexa);
-	return (_kfs_putstr(scr, buffer, strlen(buffer)));
+	int len = strlen(buffer);
+	
+	while (len < width) {
+		printed += kfs_putchar(scr, pad_char);
+		width--;
+	}
+	printed += _kfs_putstr(scr, buffer, len);
+	return (printed);
 }
 
 static int _kfs_putptr(screen *scr, void *ptr) 
@@ -77,7 +85,7 @@ static size_t parse_log_level(screen *scr, const char* data)
 	return (length);
 }
 
-static int format_specifier_handler(screen *scr, char specifier, va_list *args)
+static int format_specifier_handler(screen *scr, char specifier, va_list *args, int width, char pad_char)
 {
 	switch (specifier) {
 		case 'd':
@@ -93,10 +101,10 @@ static int format_specifier_handler(screen *scr, char specifier, va_list *args)
 			return (kfs_putchar(scr, c));
 		}
 		case 'x': {
-			return (_kfs_puthex(scr, va_arg(*args, unsigned int), "0123456789abcdef"));
+			return (_kfs_puthex(scr, va_arg(*args, unsigned int), "0123456789abcdef", width, pad_char));
 		}
 		case 'X': {
-			return (_kfs_puthex(scr, va_arg(*args, unsigned int), "0123456789ABCDEF"));
+			return (_kfs_puthex(scr, va_arg(*args, unsigned int), "0123456789ABCDEF", width, pad_char));
 		}
 		case 'p': {
 			return (_kfs_putptr(scr, va_arg(*args, void*)));
@@ -121,7 +129,21 @@ int printk(screen *scr, const char *data, ...)
 	for(size_t i = length; data[i] != '\0'; i++) {
 		if (data[i] == '%') {
 			i++;
-			length += format_specifier_handler(scr, data[i], &args);
+			
+			char pad_char = ' ';
+			int width = 0;
+			
+			if (data[i] == '0') {
+				pad_char = '0';
+				i++;
+			}
+			
+			while (data[i] >= '0' && data[i] <= '9') {
+				width = (width * 10) + (data[i] - '0');
+				i++;
+			}
+			
+			length += format_specifier_handler(scr, data[i], &args, width, pad_char);
 		} else {
 			length += kfs_putchar(scr, data[i]);
 		}
