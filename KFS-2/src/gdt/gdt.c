@@ -25,7 +25,11 @@ static void _fill_gdt(descriptor *entry, uint32_t base, uint32_t limit, gdt_acce
 static void _setup_kernel_segments(descriptor *gdt_table, gdt_granularity std_gran)
 {
 	// Kernel Code Segment (Ring 0)
-	gdt_access kernel_code_acc = { .accessed = 0, .read_write = 1, .conforming = 0, .executable = 1, .descriptor_type = 1, .privilege_level = 0, .present = 1 };
+	gdt_access kernel_code_acc = { 
+		.accessed = 0, 
+		.read_write = 1, .conforming = 0, .executable = 1, 
+		.descriptor_type = 1, 
+		.privilege_level = 0, .present = 1 };
 	_fill_gdt(&gdt_table[1], GDT_FLAT_BASE, GDT_FLAT_LIMIT, kernel_code_acc, std_gran);
 
 	// Kernel Data Segment (Ring 0)
@@ -52,8 +56,11 @@ static void _setup_user_segments(descriptor *gdt_table, gdt_granularity std_gran
 	_fill_gdt(&gdt_table[6], GDT_FLAT_BASE, GDT_FLAT_LIMIT, user_stack_acc, std_gran);
 }
 
-static void _setup_gdt_entries(descriptor *gdt_table)
+void init_gdt(kfs *k)
 {
+	// We want to place the GDT exactly at 0x800 
+	descriptor *gdt_table = (descriptor *)GDT_ADDR;
+
 	// 0: Null Descriptor (Required by CPU)
 	gdt_access null_access = {0};
 	gdt_granularity null_gran = {0};
@@ -71,21 +78,11 @@ static void _setup_gdt_entries(descriptor *gdt_table)
 		.size_flag   = 1, // 1 for 32-bit 
 		.granularity = 1  // Multiply limit by 4KB
 	};
-
 	_setup_kernel_segments(gdt_table, std_gran);
 	_setup_user_segments(gdt_table, std_gran);
 
-}
-
-void init_gdt(kfs *k)
-{
-	// We want to place the GDT exactly at 0x800 
-	descriptor *gdt_table = (descriptor *)GDT_ADDR;
-
-	_setup_gdt_entries(gdt_table);
-
 	// Setup the pointer struct for lgdt instruction
-	k->gdt.ptr.limit = (sizeof(descriptor) * NB_OF_GDT_ENTRY) - 1;
-	k->gdt.ptr.base = GDT_ADDR;
+	k->gdt->ptr.limit = (sizeof(descriptor) * NB_OF_GDT_ENTRY) - 1;
+	k->gdt->ptr.base = GDT_ADDR;
 }
 

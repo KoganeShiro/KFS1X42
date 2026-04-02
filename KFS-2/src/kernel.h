@@ -84,8 +84,8 @@ typedef struct va_list {
 
 #define HELP_MESSAGE "Available commands:\n" \
 					 "  clear:       	Clear the terminal screen\n" \
-					 "  print gdt:    	Print the GDT table\n" \
-					 "  print stack:  	Print the stack\n" \
+					 "  gdt:    		Print the GDT table\n" \
+					 "  stack:  		Print the stack\n" \
 					 "  header:      	Print the kernel header\n" \
 					 "  42header:    	Print the 42 header\n" \
 					 "  help:        	Show this help message\n" \
@@ -173,15 +173,6 @@ typedef struct screen {
     ring_buffer*    history;       /* scroll-back history for this screen */
 } screen;
 
-/* Global kernel state */
-typedef struct kfs {
-	int current_screen;
-	int total_screens;
-	screen screens[MAX_SCREENS];
-	gdt gdt;
-} kfs;
-
-
 //GDT
 #define NB_OF_GDT_ENTRY 7
 #define GDT_ADDR    0x00000800
@@ -224,6 +215,13 @@ typedef struct gdt {
 	gdt_ptr    ptr;
 } gdt;
 
+/* Global kernel state */
+typedef struct kfs {
+	int current_screen;
+	int total_screens;
+	screen screens[MAX_SCREENS];
+	gdt *gdt;
+} kfs;
 
 
 /* Get the currently active screen */
@@ -283,15 +281,15 @@ void add_char_to_cmdline_buffer(screen *scr, char c);
 void shell_prompt(screen *scr);
 
 /* parsing_command.c */
-void command_parser(screen *scr);
+void command_parser(gdt *gdt, screen *scr);
 
 
 void kfs_shutdown(screen *scr);
 void kfs_reboot(screen *scr);
 void clear_terminal(screen *scr);
 void kfs_halt(screen *scr);
-void print_gdt(screen *scr);
-void print_stack(screen *scr);
+void print_gdt(screen *scr, gdt *gdt);
+void print_stack(screen *scr, gdt *gdt);
 
 
 // Helper functions

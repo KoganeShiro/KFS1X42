@@ -110,14 +110,14 @@ static int handle_arrow_keys(screen *scr, uint8_t scancode)
 Handle special keys (Enter, Backspace, Arrow keys).
 Call map_scancode() and print it.
 */
-static void _process_scancode(screen *scr, uint8_t scancode)
+static void _process_scancode(kfs *kfs, screen *scr, uint8_t scancode)
 {
     static int shift_pressed = 0;
 
     shift_pressed = is_shift_pressed(scancode, shift_pressed);
     if (scancode == KEY_ENTER) {
         kfs_putchar(scr, '\n');
-        command_parser(scr);
+        command_parser(kfs->gdt, scr);
         return;
     }
     if (scancode == KEY_BACKSPACE) {
@@ -161,7 +161,7 @@ void handle_keyboard_keypress(kfs *k)
             }
             screen *scr = kfs_active_screen(k);
             if (scr->cursor_visible == true) {
-                _process_scancode(scr, scancode);
+                _process_scancode(k, scr, scancode);
                 update_cursor_pos(scr);
             }
         }
