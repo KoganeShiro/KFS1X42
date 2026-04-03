@@ -84,8 +84,8 @@ typedef struct va_list {
 
 #define HELP_MESSAGE "Available commands:\n" \
 					 "  clear:       	Clear the terminal screen\n" \
-					 "  gdt:    			Print the GDT table\n" \
-					 "  stack:  			Print the stack\n" \
+					 "  gdt:    		Print the GDT table\n" \
+					 "  stack:  		Print the stack\n" \
 					 "  header:      	Print the kernel header\n" \
 					 "  42header:    	Print the 42 header\n" \
 					 "  help:        	Show this help message\n" \

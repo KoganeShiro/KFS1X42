@@ -10,6 +10,7 @@ static void cmd_clear(screen *scr)    { clear_terminal(scr); }
 static void cmd_header(screen *scr)   { print_header(scr); }
 static void cmd_help(screen *scr)     { printk(scr, LOG_LEVEL_INFO HELP_MESSAGE); }
 static void cmd_shutdown(screen *scr) { kfs_shutdown(scr); }
+static void cmd_halt(screen *scr)     { kfs_halt(scr); }
 static void cmd_reboot(screen *scr)   { kfs_reboot(scr); }
 static void cmd_color(screen *scr)    { printk(scr, LOG_LEVEL_INFO COLOR_MESSAGE); }
 static void cmd_red(screen *scr)      { scr->color = VGA_COLOR_RED; }
@@ -34,6 +35,7 @@ static const command commands[] = {
     { "help",     cmd_help     },
     { "shutdown", cmd_shutdown },
     { "reboot",   cmd_reboot   },
+    { "halt",     cmd_halt     },
     { "COLOR",    cmd_color    },
     { "RED",      cmd_red      },
     { "BLUE",     cmd_blue     },
