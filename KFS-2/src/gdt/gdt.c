@@ -33,26 +33,46 @@ static void _setup_kernel_segments(descriptor *gdt_table, gdt_granularity std_gr
 	_fill_gdt(&gdt_table[1], GDT_FLAT_BASE, GDT_FLAT_LIMIT, kernel_code_acc, std_gran);
 
 	// Kernel Data Segment (Ring 0)
-	gdt_access kernel_data_acc = { .accessed = 0, .read_write = 1, .conforming = 0, .executable = 0, .descriptor_type = 1, .privilege_level = 0, .present = 1 };
+	gdt_access kernel_data_acc = { 
+		.accessed = 0, 
+		.read_write = 1, .conforming = 0, .executable = 0, 
+		.descriptor_type = 1, 
+		.privilege_level = 0, .present = 1 };
 	_fill_gdt(&gdt_table[2], GDT_FLAT_BASE, GDT_FLAT_LIMIT, kernel_data_acc, std_gran);
 
 	// Kernel Stack Segment (Ring 0)
-	gdt_access kernel_stack_acc = { .accessed = 0, .read_write = 1, .conforming = 0, .executable = 0, .descriptor_type = 1, .privilege_level = 0, .present = 1 };
+	gdt_access kernel_stack_acc = { 
+		.accessed = 0,
+		.read_write = 1, .conforming = 0, .executable = 0,
+		.descriptor_type = 1,
+		.privilege_level = 0, .present = 1 };
 	_fill_gdt(&gdt_table[3], GDT_FLAT_BASE, GDT_FLAT_LIMIT, kernel_stack_acc, std_gran);
 }
 
 static void _setup_user_segments(descriptor *gdt_table, gdt_granularity std_gran)
 {
 	// User Code Segment (Ring 3)
-	gdt_access user_code_acc = { .accessed = 0, .read_write = 1, .conforming = 0, .executable = 1, .descriptor_type = 1, .privilege_level = 3, .present = 1 };
+	gdt_access user_code_acc = { 
+		.accessed = 0, 
+		.read_write = 1, .conforming = 0, .executable = 1, 
+		.descriptor_type = 1, 
+		.privilege_level = 3, .present = 1 };
 	_fill_gdt(&gdt_table[4], GDT_FLAT_BASE, GDT_FLAT_LIMIT, user_code_acc, std_gran);
 
 	// User Data Segment (Ring 3)
-	gdt_access user_data_acc = { .accessed = 0, .read_write = 1, .conforming = 0, .executable = 0, .descriptor_type = 1, .privilege_level = 3, .present = 1 };
+	gdt_access user_data_acc = { 
+		.accessed = 0, 
+		.read_write = 1, .conforming = 0, .executable = 0, 
+		.descriptor_type = 1, 
+		.privilege_level = 3, .present = 1 };
 	_fill_gdt(&gdt_table[5], GDT_FLAT_BASE, GDT_FLAT_LIMIT, user_data_acc, std_gran);
 
-	// User Stack Segment (Ring 3)
-	gdt_access user_stack_acc = { .accessed = 0, .read_write = 1, .conforming = 0, .executable = 0, .descriptor_type = 1, .privilege_level = 3, .present = 1 };
+	// User Stack Segment (Ring 3) -> could be the same as the data segment
+	gdt_access user_stack_acc = { 
+		.accessed = 0, 
+		.read_write = 1, .conforming = 0, .executable = 0, 
+		.descriptor_type = 1, 
+		.privilege_level = 3, .present = 1 };
 	_fill_gdt(&gdt_table[6], GDT_FLAT_BASE, GDT_FLAT_LIMIT, user_stack_acc, std_gran);
 }
 
@@ -75,7 +95,7 @@ void init_gdt(kfs *k)
 	_setup_kernel_segments(k->gdt->entries, std_gran);
 	_setup_user_segments(k->gdt->entries, std_gran);
 
-	k->gdt->ptr.limit = (sizeof(descriptor) * NB_OF_GDT_ENTRY) - 1;
+	k->gdt->ptr.limit = (sizeof(descriptor) * NB_OF_GDT_ENTRY) - 1; //which corresponds to (56 bytes for 7 entries) - 1 = 55 in decimal = 0x37 in hexadecimal
 	k->gdt->ptr.base = (uint32_t)&k->gdt->entries;
 
 	load_gdt(&(k->gdt->ptr));
