@@ -10,17 +10,17 @@ Yeah, the BIOS. Thanks to **GRUB** (Bootloader), it will help you a lot !
 ## Mandatory
 ### Base
 Let’s sum this up:
-	- You must create a [[GDT (Global Descriptor Table)]].
-	- Your GDT must contain:
-		- Kernel Code
-		- Kernel Data
-		- Kernel stack
-		- User code
-		- User data
-		- User stack
-		- Your work should not exceed 10 MB.
-	- You must declare your GDT to the BIOS.
-	- The GDT must be set at address 0x00000800.
+- You must create a [[GDT (Global Descriptor Table)]].
+- Your GDT must contain:
+	- Kernel Code
+	- Kernel Data
+	- Kernel stack
+	- User code
+	- User data
+	- User stack
+	- Your work should not exceed 10 MB.
+- You must declare your GDT to the BIOS.
+- The GDT must be set at address 0x00000800.
 
 When this is done, you have to code a tool to print the kernel stack, in a human-friendly way. (Tip: If you haven’t made a printk yet, now is a good time !)
 
