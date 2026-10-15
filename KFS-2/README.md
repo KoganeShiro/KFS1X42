@@ -48,15 +48,17 @@ What are asked in the subject is to create a GDT with 6 entries: Kernel code, Ke
 
 The GDT entries can be represented in a table like this:
 
-Index | Segment        | Base    | Limit  | Priv | Type        | Reason
-------+----------------+---------+--------+------+-------------+---------------------------
-0     | Null           | 0x00000 | 0x0000 | —    | —           | Required by CPU (must exist)
-1     | Kernel Code    | 0x10000 | 0xFFFF | 0    | Exec        | Kernel instructions
-2     | Kernel Data    | 0x10000 | 0xFFFF | 0    | Read/Write  | Kernel data
-3     | Kernel Stack   | 0x18000 | 0xFFFF | 0    | Read/Write  | Kernel stack (Same as data, for SS)
-4     | User Code      | 0x20000 | 0xFFFF | 3    | Exec        | User programs
-5     | User Data      | 0x20000 | 0xFFFF | 3    | Read/Write  | User data
-6     | User Stack     | 0x28000 | 0xFFFF | 3    | Read/Write  | User stack (Same as data, for SS)
+
+|Index | Segment        | Base    | Limit  | Priv | Type        | Reason
+|------|----------------|---------|--------|------|-------------|---------------------------
+|0     | Null           | 0x00000 | 0x0000 | —    | —           | Required by CPU (must exist)
+|1     | Kernel Code    | 0x10000 | 0xFFFF | 0    | Exec        | Kernel instructions
+|2     | Kernel Data    | 0x10000 | 0xFFFF | 0    | Read/Write  | Kernel data
+|3     | Kernel Stack   | 0x18000 | 0xFFFF | 0    | Read/Write  | Kernel stack (Same as data, for SS)
+|4     | User Code      | 0x20000 | 0xFFFF | 3    | Exec        | User programs
+|5     | User Data      | 0x20000 | 0xFFFF | 3    | Read/Write  | User data
+|6     | User Stack     | 0x28000 | 0xFFFF | 3    | Read/Write  | User stack (Same as data, for SS)
+
 
 | Index | Selector | Segment         | Base | Limit   | Access | Granularity |
 |-------|----------|-----------------|------|---------|--------|-------------|
